@@ -9,7 +9,6 @@
 import CommonLayout from '@/components/Layout/CommonLayout.vue'
 import RoomContent from '@/components/Room/RoomContent.vue'
 import RoomFooter from '@/components/Room/RoomFooter.vue'
-
 import { getStreamPreview } from '@/utils/rtc.util'
 
 onMounted(() => {
@@ -17,6 +16,6 @@ onMounted(() => {
 })
 
 const initiateRoom = async () => {
-  getStreamPreview({})
+  getStreamPreview()
 }
 </script>
