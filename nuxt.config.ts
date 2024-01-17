@@ -1,5 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'WebRTC Alibaihaqi',
+    },
+  },
+
   devtools: { enabled: true },
   modules: [
     '@nuxt/image',
@@ -11,13 +17,6 @@ export default defineNuxtConfig({
   ],
 
   vuefire: {
-    // appCheck: {
-    //   // Allows you to use a debug token in development
-    //   debug: process.env.NODE_ENV !== 'production',
-    //   isTokenAutoRefreshEnabled: true,
-    //   provider: 'ReCaptchaV3',
-    // },
-
     auth: {
       enabled: true,
       sessionCookie: true,
