@@ -46,6 +46,7 @@
 <script lang="ts" setup>
 import Button from '@/components/Common/Button.vue'
 import { checkAvailabilityRoom } from '@/utils/firebase.util'
+import { initiateSocket } from '@/utils/ws.util';
 
 const route = useRoute()
 const router = useRouter()
@@ -60,6 +61,7 @@ const generateTitle = computed(() => {
 
 const onClickButtonHandler = async () => {
   try {
+    initiateSocket()
     if (!isHostMeeting.value) {
       const result: any = await checkAvailabilityRoom({
         isHostMeeting: isHostMeeting.value,
@@ -78,7 +80,3 @@ const onClickButtonHandler = async () => {
   }
 }
 </script>
-
-<style>
-
-</style>
