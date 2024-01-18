@@ -10,10 +10,3 @@ export interface IInitiateRoom {
   isHostMeeting: boolean
   roomId?: string
 }
-
-export interface IRoomData {
-  id?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
