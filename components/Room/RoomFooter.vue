@@ -34,7 +34,7 @@ import {
 } from '@/constants/icon.constant'
 import type { TActionButton } from '@/interfaces/room.interface'
 import { useRoomStore } from '@/stores/room.store'
-import { disconnectStream } from '@/utils/rtc.util'
+import { disconnectWebSocket } from '@/utils/ws.util'
 
 const router = useRouter()
 const roomStore = useRoomStore()
@@ -45,7 +45,7 @@ const onButtonClickHandler = (action: TActionButton) => {
 
 const onLeaveMeetingRoom = async () => {
   try {
-    disconnectStream()
+    disconnectWebSocket()
     await router.replace('/')
   } catch (error) {
     console.log('Log Error:', error)
