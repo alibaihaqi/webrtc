@@ -14,6 +14,7 @@
     "@nuxtjs/tailwindcss": "^6.10.4",
     "@nuxtjs/web-vitals": "^0.2.6",
     "@pinia/nuxt": "^0.5.1",
+    "@types/simple-peer": "^9.11.8",
     "nuxt": "^3.9.1",
     "nuxt-vuefire": "^1.0.1",
     "vue": "^3.4.10",
@@ -25,6 +26,7 @@
     "firebase": "^10.7.1",
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.6.0",
+    "simple-peer": "^9.11.1",
     "vuefire": "^3.1.22"
   }
 }

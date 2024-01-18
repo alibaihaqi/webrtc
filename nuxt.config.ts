@@ -16,6 +16,12 @@ export default defineNuxtConfig({
     'nuxt-vuefire',
   ],
 
+  runtimeConfig: {
+    public: {
+      wsDomain: '',
+    },
+  },
+
   vuefire: {
     auth: {
       enabled: true,
