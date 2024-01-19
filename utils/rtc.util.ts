@@ -1,20 +1,28 @@
+// @ts-ignore
+import Peer from 'simple-peer/simplepeer.min.js'
+import type { SimplePeer } from 'simple-peer'
 import { defaultMediaStreamConstraints, rtcPeerConfiguration } from '@/constants/rtc.constant'
 import { useRoomStore } from '@/stores/room.store'
-import { createMeetingRoom } from '@/utils/firebase.util'
+import {
+  signalPeerData,
+  wsCreateRoom,
+  wsJoinRoom,
+} from '@/utils/ws.util'
 
 let localStream: null | MediaStream = null
-let peerConnection: null | RTCPeerConnection = null
 let streams: MediaStream[] = []
 
-export const getStreamPreview = async (config: any) => {
+export const getStreamPreview = async () => {
+  const roomStore = useRoomStore()
+
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
-
+    
     showVideoStream(localStream)
 
-    localStream.getTracks().forEach(track => {
-      peerConnection?.addTrack(track, localStream as MediaStream);
-    })
+    roomStore.isHostMeeting
+      ? wsCreateRoom()
+      : wsJoinRoom()
   } catch (error) {
     console.log(error)
   }
@@ -29,7 +37,7 @@ const getConnectedDevices = async (type: string) => {
   return devices.filter(device => device.kind === type)
 }
 
-export const showVideoStream = (stream: MediaStream) => {
+export const showVideoStream = (stream: MediaStream, socketId: string = '') => {
   const videosContainer = document.getElementById('videos_container')
   videosContainer?.classList.add('videos_container_styles')
 
@@ -70,26 +78,64 @@ export const videoToggle = (value: boolean) => {
   localStream.getVideoTracks()[0].enabled = value
 }
 
-export const prepareNewPeerConnection = () => {
-  peerConnection = new RTCPeerConnection(rtcPeerConfiguration)
+let peers: Record<string, InstanceType<SimplePeer>> = {}
+
+export const initiatePeerConnection = (connectedSocketId: string, isInitiator: boolean) => {
+  peers[connectedSocketId] = new Peer({
+    initiator: isInitiator,
+    config: rtcPeerConfiguration,
+    stream: localStream as MediaStream,
+  })
+
+  peers[connectedSocketId].on('signal', (data: any) => {
+    const signalData = {
+      signal: data,
+      connectedSocketId: connectedSocketId,
+    }
+    signalPeerData(signalData)
+  })
+
+  peers[connectedSocketId].on('stream', (stream: any) => {
+    addStream(stream, connectedSocketId)
+    streams = [...streams, stream]
+  })
+
+  peers[connectedSocketId].on('data', (data: string) => {
+    const messageData = JSON.parse(data)
+    concatNewMessage(messageData)
+  })
 }
 
-export const registerPeerConnectionListeners = () => {
-  peerConnection?.addEventListener('icegatheringstatechange', () => {
-    console.log(
-        `ICE gathering state changed: ${peerConnection?.iceGatheringState}`);
-  });
+export const handleSignalingData = (data: any) => {
+  peers[data.connectedSocketId].signal(data.signal)
+}
 
-  peerConnection?.addEventListener('connectionstatechange', () => {
-    console.log(`Connection state change: ${peerConnection?.connectionState}`);
-  });
+const addStream = (stream: MediaStream, connectedSocketId: string) => {
+  showVideoStream(stream, connectedSocketId)
+}
 
-  peerConnection?.addEventListener('signalingstatechange', () => {
-    console.log(`Signaling state change: ${peerConnection?.signalingState}`);
-  });
+export const concatNewMessage = (message: any) => {
+  const roomStore = useRoomStore()
+  roomStore.setMessages([...roomStore.messages, message])
+}
 
-  peerConnection?.addEventListener('iceconnectionstatechange ', () => {
-    console.log(
-        `ICE connection state change: ${peerConnection?.iceConnectionState}`);
-  });
+export const removePeerConnection = (data: any) => {
+  const { socketId } = data
+
+  const videoContainer = document.getElementById(socketId)
+  const videoElement = document.getElementById(`${socketId}.video`) as any
+
+  if (videoContainer && videoElement) {
+    const tracks = videoElement.srcObject?.getTracks()
+    tracks.forEach((t: any) => t.stop())
+
+    videoElement.srcObject = null
+    videoContainer.removeChild(videoElement)
+    videoContainer.parentNode?.removeChild(videoContainer)
+
+    if (peers[socketId]) {
+      peers[socketId].destroy()
+      delete peers[socketId]
+    }
+  }
 }
