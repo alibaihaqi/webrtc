@@ -27,6 +27,10 @@ export const initiateSocket = () => {
         roomStore.setRoomId(message.roomId)
         break
       }
+      case 'connected-users': {
+        roomStore.setRoomUsers(message.connectedUsers)
+        break
+      }
       case 'connection-prepare': {
         initiatePeerConnection(message.connectedSocketId, false)
         
@@ -78,10 +82,19 @@ export const wsJoinRoom = (roomId: string) => {
 }
 
 export const signalPeerData = (data: any) => {
-  const message = {
-    action: 'message',
-    event: 'connection-signal',
-    data
+  const roomStore = useRoomStore()
+
+  const isSignalConnectionSent = roomStore.signalConnections.filter((signalConnection) => {
+    return signalConnection.connectionId === data.connectionId && signalConnection?.signal?.type === data?.signal?.type
+  })
+
+  if (!isSignalConnectionSent.length) {
+    const message = {
+      action: 'message',
+      event: 'connection-signal',
+      data
+    }
+    socket?.send(constructMessage(message))
+    roomStore.setSignalConnections(data)
   }
-  socket?.send(constructMessage(message))
 }
