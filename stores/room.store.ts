@@ -7,6 +7,7 @@ export const useRoomStore = defineStore({
     messages: [],
     roomId: '',
     socketId: '',
+    isDisableToRoomButton: true,
     isHostMeeting: true,
     isMicrophoneActive: true,
     isVideoActive: true,
@@ -25,6 +26,9 @@ export const useRoomStore = defineStore({
     },
     setRoomId(value: string) {
       this.roomId = value
+    },
+    setIsDisableToRoomButton(value: boolean) {
+      this.isDisableToRoomButton = value
     },
     setIsHostMeeting(value: boolean) {
       this.isHostMeeting = value
