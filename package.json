@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "generate:script": "node scripts/generate-file.js",
+    "build": "pnpm run generate:script && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
