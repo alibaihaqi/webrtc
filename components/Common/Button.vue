@@ -7,6 +7,7 @@
       ${ btnType ? `btn-${btnType}` : 'btn-primary' }
       ${ size ? `s-${size}` : null }
     `"
+    :disabled="disabled || false"
     @click="onClickHandler"
   >
     {{ title }}
@@ -15,6 +16,7 @@
 
 <script lang="ts" setup>
 defineProps<{
+  disabled?: boolean
   title: string
   btnType?: string
   size?: 'default' | 'medium' | 'small'
@@ -29,7 +31,7 @@ const onClickHandler = () => {
 
 <style scoped>
 .btn-primary {
-  @apply bg-blue-500 text-white;
+  @apply bg-blue-500 text-white disabled:bg-gray-500 disabled:hover:brightness-100;
 }
 
 .btn-secondary {
