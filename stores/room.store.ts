@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
+import type { IRoomState } from '@/interfaces/room.interface'
 import { micToggle, videoToggle } from '@/utils/rtc.util'
 
 export const useRoomStore = defineStore({
   id: 'roomStore',
-  state: () => ({
+  state: (): IRoomState => ({
     messages: [],
     roomId: '',
+    roomUsers: [],
+    signalConnections: [],
     socketId: '',
     isDisableToRoomButton: true,
     isHostMeeting: true,
@@ -16,7 +19,10 @@ export const useRoomStore = defineStore({
     resetToDefaultState() {
       this.messages = []
       this.roomId = ''
+      this.roomUsers = []
+      this.signalConnections = []
       this.socketId = ''
+      this.isDisableToRoomButton = true
       this.isHostMeeting = true
       this.isMicrophoneActive = true
       this.isVideoActive = true
@@ -26,6 +32,12 @@ export const useRoomStore = defineStore({
     },
     setRoomId(value: string) {
       this.roomId = value
+    },
+    setRoomUsers(value: any) {
+      this.roomUsers = value
+    },
+    setSignalConnections(value: any) {
+      this.signalConnections.push(value)
     },
     setIsDisableToRoomButton(value: boolean) {
       this.isDisableToRoomButton = value
