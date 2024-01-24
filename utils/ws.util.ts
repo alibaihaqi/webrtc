@@ -1,4 +1,5 @@
 import { useRoomStore } from '@/stores/room.store'
+import { constructMessage } from '@/utils/message.util'
 import {
   disconnectStream,
   handleSignalingData,
@@ -13,30 +14,44 @@ export const initiateSocket = () => {
   const config = useRuntimeConfig()
   socket = new WebSocket(config.public.wsDomain)
 
-  socket.addEventListener('open', () => {
-    const message = JSON.stringify({ action: 'message', event: 'client-id' })
-    socket?.send(message)
-  })
+  socket.onopen = () => {
+    roomStore.setIsDisableToRoomButton(false)
+  }
 
   socket.addEventListener('message', ({ data }: any) => {
     const message = JSON.parse(data)
-    console.log('addEventListener', message)
+
     switch (message.event) {
-      case 'client-id': {
-        console.log('message.data', message.data, config.public.wsDomain)
-        roomStore.setSocketId(message.data)
+      case 'create-room': {
+        roomStore.setSocketId(message.connectionId)
+        roomStore.setRoomId(message.roomId)
+        break
       }
       case 'connection-prepare': {
-        initiatePeerConnection(data.connectedSocketId, false)
+        initiatePeerConnection(message.connectedSocketId, false)
         
-        const emitMessage = JSON.stringify({ event: 'connection-init', data: { connectedSocketId: data.connectedSocketId }})
+        const messageConnectionInit = {
+          action: 'message',
+          event: 'connection-init',
+          data: { connectionId: message.connectedSocketId }
+        }
+        const emitMessage = constructMessage(messageConnectionInit)
         socket?.send(emitMessage)
+        break
       }
-      case 'connection-signal': handleSignalingData(message.data)
-      case 'connection-init': initiatePeerConnection(message.data.connectedSocketId, true)
-      case 'user-disconnected': removePeerConnection(message.data)
+      case 'connection-signal': {
+        handleSignalingData(message)
+        break
+      }
+      case 'connection-init': {
+        initiatePeerConnection(message.connectedSocketId, true)
+        break
+      }
+      case 'user-disconnected': {
+        removePeerConnection(message.data)
+        break
+      }
     }
-
   })
 }
 
@@ -46,14 +61,27 @@ export const disconnectWebSocket = () => {
 }
 
 export const wsCreateRoom = () => {
-
+  const message = {
+    action: 'message',
+    event: 'create-room',
+  }
+  socket?.send(constructMessage(message))
 }
 
-export const wsJoinRoom = () => {
-  
+export const wsJoinRoom = (roomId: string) => {
+  const message = {
+    action: 'message',
+    event: 'join-room',
+    data: { roomId: roomId }
+  }
+  socket?.send(constructMessage(message))
 }
 
 export const signalPeerData = (data: any) => {
-  const message = JSON.stringify({ event: 'connection-signal', data })
-  socket?.send(message)
+  const message = {
+    action: 'message',
+    event: 'connection-signal',
+    data
+  }
+  socket?.send(constructMessage(message))
 }
