@@ -11,6 +11,10 @@ import RoomContent from '@/components/Room/RoomContent.vue'
 import RoomFooter from '@/components/Room/RoomFooter.vue'
 import { getStreamPreview } from '@/utils/rtc.util'
 
+useHead({
+  titleTemplate: '%s | Room',
+})
+
 onMounted(() => {
   initiateRoom()
 })
