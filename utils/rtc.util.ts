@@ -18,7 +18,7 @@ export const getStreamPreview = async () => {
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
     
-    showVideoStream(localStream)
+    showVideoStream(localStream, roomStore.socketId)
 
     roomStore.isHostMeeting
       ? wsCreateRoom()
