@@ -48,6 +48,11 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '') => {
   videoElement.autoplay = true
   videoElement.srcObject = stream
 
+  if (socketId) {
+    videoContainer.id = socketId
+    videoElement.id = `${socketId}.video`
+  }
+
   videoElement.onloadedmetadata = () => {
     videoElement.play()
   }
@@ -118,11 +123,10 @@ export const concatNewMessage = (message: any) => {
   roomStore.setMessages([...roomStore.messages, message])
 }
 
-export const removePeerConnection = (data: any) => {
-  const { socketId } = data
+export const removePeerConnection = (connectionId: string) => {
 
-  const videoContainer = document.getElementById(socketId)
-  const videoElement = document.getElementById(`${socketId}.video`) as any
+  const videoContainer = document.getElementById(connectionId)
+  const videoElement = document.getElementById(`${connectionId}.video`) as any
 
   if (videoContainer && videoElement) {
     const tracks = videoElement.srcObject?.getTracks()
@@ -132,9 +136,9 @@ export const removePeerConnection = (data: any) => {
     videoContainer.removeChild(videoElement)
     videoContainer.parentNode?.removeChild(videoContainer)
 
-    if (peers[socketId]) {
-      peers[socketId].destroy()
-      delete peers[socketId]
+    if (peers[connectionId]) {
+      peers[connectionId].destroy()
+      delete peers[connectionId]
     }
   }
 }

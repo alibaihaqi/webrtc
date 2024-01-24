@@ -48,7 +48,7 @@ export const initiateSocket = () => {
         break
       }
       case 'user-disconnected': {
-        removePeerConnection(message.data)
+        removePeerConnection(message.connectionId)
         break
       }
     }
