@@ -5,6 +5,7 @@
   >
     <nuxt-img
       height="24"
+      width="24"
       src="/imgs/google.png"
     />
     <span class="text-sm text-bold text-gray-800">
