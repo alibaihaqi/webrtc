@@ -22,7 +22,7 @@ export const getStreamPreview = async () => {
 
     roomStore.isHostMeeting
       ? wsCreateRoom()
-      : wsJoinRoom()
+      : wsJoinRoom(roomStore.roomId)
   } catch (error) {
     console.log(error)
   }
@@ -90,7 +90,7 @@ export const initiatePeerConnection = (connectedSocketId: string, isInitiator: b
   peers[connectedSocketId].on('signal', (data: any) => {
     const signalData = {
       signal: data,
-      connectedSocketId: connectedSocketId,
+      connectionId: connectedSocketId,
     }
     signalPeerData(signalData)
   })
@@ -107,7 +107,7 @@ export const initiatePeerConnection = (connectedSocketId: string, isInitiator: b
 }
 
 export const handleSignalingData = (data: any) => {
-  peers[data.connectedSocketId].signal(data.signal)
+  peers[data.connectionId].signal(data.signal)
 }
 
 const addStream = (stream: MediaStream, connectedSocketId: string) => {
