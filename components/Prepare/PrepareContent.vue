@@ -20,7 +20,7 @@
 
         <input
           v-model="roomId"
-          class="border border-blue-500 px-4 py-2 rounded-md focus:ring-1 focus:ring-sky-500"
+          class="border border-blue-500 px-4 py-2 text-sm rounded-md focus:ring-1 focus:ring-sky-500"
           placeholder="Enter room ID"
           type="text"
         />
@@ -37,6 +37,7 @@
       <Button
         class="flex-1"
         :title="generateTitle"
+        :disabled="roomStore.isDisableToRoomButton"
         @on-click="onClickButtonHandler"
       />
     </div>
@@ -45,11 +46,13 @@
 
 <script lang="ts" setup>
 import Button from '@/components/Common/Button.vue'
-import { checkAvailabilityRoom } from '@/utils/firebase.util'
+import { useRoomStore } from '@/stores/room.store'
+import { checkAvailabilityRoom } from '@/utils/rest.util'
 import { initiateSocket } from '@/utils/ws.util';
 
 const route = useRoute()
 const router = useRouter()
+const roomStore = useRoomStore()
 
 const roomId = ref('')
 
@@ -59,9 +62,12 @@ const generateTitle = computed(() => {
   return isHostMeeting.value ? 'Host' : 'Join'
 })
 
+onMounted(() => {
+  initiateSocket()
+})
+
 const onClickButtonHandler = async () => {
   try {
-    initiateSocket()
     if (!isHostMeeting.value) {
       const result: any = await checkAvailabilityRoom({
         isHostMeeting: isHostMeeting.value,
