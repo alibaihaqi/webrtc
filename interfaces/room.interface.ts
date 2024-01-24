@@ -10,3 +10,15 @@ export interface IInitiateRoom {
   isHostMeeting: boolean
   roomId?: string
 }
+
+export interface IRoomState {
+  messages: any[]
+  roomId: string
+  roomUsers: any[]
+  signalConnections: any[]
+  socketId: string
+  isDisableToRoomButton: boolean
+  isHostMeeting: boolean
+  isMicrophoneActive: boolean
+  isVideoActive: boolean
+}
