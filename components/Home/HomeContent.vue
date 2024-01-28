@@ -59,7 +59,7 @@ const onClickRoute = async (isHost: boolean = false) => {
   try {
     await router.push(`/prepare${queryRoute}`)
   } catch (error) {
-    console.log(error)
+    console.log('route errorr:', error)
   }
 }
 </script>

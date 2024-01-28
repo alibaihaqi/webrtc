@@ -48,7 +48,7 @@ const onLeaveMeetingRoom = async () => {
     disconnectWebSocket()
     await router.replace('/')
   } catch (error) {
-    console.log('Log Error:', error)
+    console.log('route Error:', error)
   }
 }
 </script>
