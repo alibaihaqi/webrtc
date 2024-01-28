@@ -24,7 +24,7 @@ export const getStreamPreview = async () => {
       ? wsCreateRoom()
       : wsJoinRoom(roomStore.roomId)
   } catch (error) {
-    console.log(error)
+    console.log('Error open media devices:', error)
   }
 }
 

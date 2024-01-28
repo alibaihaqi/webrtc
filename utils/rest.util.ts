@@ -14,7 +14,7 @@ export const checkAvailabilityRoom = async (payload: IInitiateRoom) => {
   })
 
   if (error.value) {
-    console.log('Error:', error.value)
+    console.log('Error RTC check room:', error.value)
 
     return {
       success: false,
