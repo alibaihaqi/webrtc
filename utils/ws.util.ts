@@ -27,7 +27,7 @@ export const initiateSocket = () => {
         roomStore.setRoomId(message.roomId)
         break
       }
-      case 'connected-users': {
+      case 'room-users': {
         roomStore.setRoomUsers(message.connectedUsers)
         break
       }
