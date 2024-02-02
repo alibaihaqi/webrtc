@@ -43,12 +43,12 @@ export const initiateSocket = () => {
         socket?.send(emitMessage)
         break
       }
-      case 'connection-signal': {
-        handleSignalingData(message)
-        break
-      }
       case 'connection-init': {
         initiatePeerConnection(message.connectedSocketId, true)
+        break
+      }
+      case 'connection-signal': {
+        handleSignalingData(message)
         break
       }
       case 'user-disconnected': {
