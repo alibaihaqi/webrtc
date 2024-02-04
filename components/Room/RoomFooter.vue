@@ -1,3 +1,24 @@
+<script lang="ts" setup>
+import RoomButton from '@/components/Room/RoomButton.vue'
+import {
+  MICROPHONE_ICON_SETS,
+  PARTICIPANTS_ICON_SETS,
+  VIDEO_ICON_SETS,
+} from '@/constants/icon.constant'
+import type { TActionButton } from '@/interfaces/room.interface'
+import { useRoomStore } from '@/stores/room.store'
+
+const props = defineProps<{
+  onLeaveMeetingRoom: any
+}>()
+const roomStore = useRoomStore()
+
+const onButtonClickHandler = (action: TActionButton) => {
+  console.log('action', action)
+  roomStore[action]()
+}
+</script>
+
 <template>
   <footer class="flex justify-around sm:justify-between items-center bg-gray-900 pt-1">
     <section class="flex gap-1 sm:gap-2">
@@ -14,6 +35,14 @@
       />
     </section>
 
+    <section class="flex">
+      <RoomButton
+        class="hidden sm:inline-flex"
+        :isActive="roomStore.isShowParticipants"
+        :sources="PARTICIPANTS_ICON_SETS"
+        @onClick="onButtonClickHandler('setIsShowParticipants')"
+      />
+    </section>
 
     <section class="px-2">
       <button
@@ -26,29 +55,3 @@
   </footer>
 </template>
 
-<script lang="ts" setup>
-import RoomButton from '@/components/Room/RoomButton.vue'
-import {
-  MICROPHONE_ICON_SETS,
-  VIDEO_ICON_SETS,
-} from '@/constants/icon.constant'
-import type { TActionButton } from '@/interfaces/room.interface'
-import { useRoomStore } from '@/stores/room.store'
-import { disconnectWebSocket } from '@/utils/ws.util'
-
-const router = useRouter()
-const roomStore = useRoomStore()
-
-const onButtonClickHandler = (action: TActionButton) => {
-  roomStore[action]()
-}
-
-const onLeaveMeetingRoom = async () => {
-  try {
-    disconnectWebSocket()
-    await router.replace('/')
-  } catch (error) {
-    console.log('route Error:', error)
-  }
-}
-</script>
