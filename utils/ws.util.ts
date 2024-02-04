@@ -64,19 +64,20 @@ export const disconnectWebSocket = () => {
   socket?.close()
 }
 
-export const wsCreateRoom = () => {
+export const wsCreateRoom = (name: string) => {
   const message = {
     action: 'message',
     event: 'create-room',
+    data: { name },
   }
   socket?.send(constructMessage(message))
 }
 
-export const wsJoinRoom = (roomId: string) => {
+export const wsJoinRoom = (roomId: string, name: string) => {
   const message = {
     action: 'message',
     event: 'join-room',
-    data: { roomId: roomId }
+    data: { roomId: roomId, name }
   }
   socket?.send(constructMessage(message))
 }
