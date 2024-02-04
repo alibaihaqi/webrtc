@@ -61,6 +61,13 @@ export const useRoomStore = defineStore({
       this.isVideoActive = !this.isVideoActive
 
       videoToggle(this.isVideoActive)
+    },
+    setDisableAudioAndVideo() {
+      this.isMicrophoneActive = false
+      this.isVideoActive = false
+
+      micToggle(this.isMicrophoneActive)
+      videoToggle(this.isVideoActive)
     }
   }
 })

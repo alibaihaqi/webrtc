@@ -14,7 +14,6 @@ export interface IInitiateRoom {
 export interface IRoomUser {
   connectionId: string
   name: string | null
-  userId: string
 }
 
 export interface IRoomState {
