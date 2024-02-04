@@ -30,6 +30,8 @@ export const getStreamPreview = async () => {
     roomStore.isHostMeeting
       ? wsCreateRoom(username)
       : wsJoinRoom(roomStore.roomId, username)
+
+    roomStore.setDisableAudioAndVideo()
   } catch (error) {
     console.log('Error open media devices:', error)
   }
@@ -45,7 +47,6 @@ const getConnectedDevices = async (type: string) => {
 }
 
 export const showVideoStream = (stream: MediaStream, socketId: string = '', isMuteVideo: boolean = true) => {
-  console.log('isMuteVideo', isMuteVideo)
   const videosContainer = document.getElementById('videos_container')
   videosContainer?.classList.add('videos_container_styles')
 
