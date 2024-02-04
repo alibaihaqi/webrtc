@@ -4,21 +4,28 @@ export interface IRoomActionButton {
   iconPath: string
 }
 
-export type TActionButton = 'setMicrophone' | 'setVideo'
+export type TActionButton = 'setMicrophone' | 'setVideo' | 'setIsShowParticipants'
 
 export interface IInitiateRoom {
   isHostMeeting: boolean
   roomId?: string
 }
 
+export interface IRoomUser {
+  connectionId: string
+  name: string | null
+  userId: string
+}
+
 export interface IRoomState {
   messages: any[]
   roomId: string
-  roomUsers: any[]
+  roomUsers: IRoomUser[]
   signalConnections: any[]
   socketId: string
   isDisableToRoomButton: boolean
   isHostMeeting: boolean
   isMicrophoneActive: boolean
+  isShowParticipants: boolean
   isVideoActive: boolean
 }
