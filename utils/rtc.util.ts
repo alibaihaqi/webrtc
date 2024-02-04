@@ -18,7 +18,8 @@ export const getStreamPreview = async () => {
   const roomStore = useRoomStore()
   const config = useRuntimeConfig()
   const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
-  
+  console.log('isMuteVideo config', isMuteVideo)
+
   const firebase = useFirebase()
   const username = firebase?.userInfo?.value?.displayName as string
 
@@ -45,6 +46,7 @@ const getConnectedDevices = async (type: string) => {
 }
 
 export const showVideoStream = (stream: MediaStream, socketId: string = '', isMuteVideo: boolean = true) => {
+  console.log('isMuteVideo', isMuteVideo)
   const videosContainer = document.getElementById('videos_container')
   videosContainer?.classList.add('videos_container_styles')
 

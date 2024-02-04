@@ -14,7 +14,6 @@ const props = defineProps<{
 const roomStore = useRoomStore()
 
 const onButtonClickHandler = (action: TActionButton) => {
-  console.log('action', action)
   roomStore[action]()
 }
 </script>
