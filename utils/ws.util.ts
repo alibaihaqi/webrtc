@@ -15,6 +15,12 @@ export const initiateSocket = () => {
   socket = new WebSocket(config.public.wsDomain)
 
   socket.onopen = () => {
+    const messageClientId = {
+      action: 'message',
+      event: 'client-id',
+    }
+    socket?.send(constructMessage(messageClientId))
+    
     roomStore.setIsDisableToRoomButton(false)
   }
 
@@ -22,8 +28,10 @@ export const initiateSocket = () => {
     const message = JSON.parse(data)
 
     switch (message.event) {
-      case 'create-room': {
+      case 'client-id':
         roomStore.setSocketId(message.connectionId)
+        break
+      case 'create-room': {
         roomStore.setRoomId(message.roomId)
         break
       }
