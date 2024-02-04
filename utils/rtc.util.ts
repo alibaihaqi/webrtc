@@ -1,6 +1,8 @@
 // @ts-ignore
 import Peer from 'simple-peer/simplepeer.min.js'
 import type { SimplePeer } from 'simple-peer'
+
+import { useFirebase } from '@/composables/firebase'
 import { defaultMediaStreamConstraints, rtcPeerConfiguration } from '@/constants/rtc.constant'
 import { useRoomStore } from '@/stores/room.store'
 import {
@@ -14,15 +16,20 @@ let streams: MediaStream[] = []
 
 export const getStreamPreview = async () => {
   const roomStore = useRoomStore()
+  const config = useRuntimeConfig()
+  const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
+  
+  const firebase = useFirebase()
+  const username = firebase?.userInfo?.value?.displayName as string
 
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
     
-    showVideoStream(localStream, roomStore.socketId)
+    showVideoStream(localStream, roomStore.socketId, isMuteVideo)
 
     roomStore.isHostMeeting
-      ? wsCreateRoom()
-      : wsJoinRoom(roomStore.roomId)
+      ? wsCreateRoom(username)
+      : wsJoinRoom(roomStore.roomId, username)
   } catch (error) {
     console.log('Error open media devices:', error)
   }
@@ -37,7 +44,7 @@ const getConnectedDevices = async (type: string) => {
   return devices.filter(device => device.kind === type)
 }
 
-export const showVideoStream = (stream: MediaStream, socketId: string = '') => {
+export const showVideoStream = (stream: MediaStream, socketId: string = '', isMuteVideo: boolean = true) => {
   const videosContainer = document.getElementById('videos_container')
   videosContainer?.classList.add('videos_container_styles')
 
@@ -46,6 +53,7 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '') => {
 
   const videoElement = document.createElement('video')
   videoElement.autoplay = true
+  videoElement.muted = isMuteVideo
   videoElement.srcObject = stream
 
   if (socketId) {
@@ -115,7 +123,10 @@ export const handleSignalingData = (data: any) => {
 }
 
 const addStream = (stream: MediaStream, connectedSocketId: string) => {
-  showVideoStream(stream, connectedSocketId)
+  const config = useRuntimeConfig()
+  const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
+
+  showVideoStream(stream, connectedSocketId, isMuteVideo)
 }
 
 export const concatNewMessage = (message: any) => {
