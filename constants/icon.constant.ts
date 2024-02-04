@@ -25,3 +25,16 @@ export const VIDEO_ICON_SETS: IRoomActionButton[] = [
     iconPath: '/icons/video-camera.svg',
   }
 ]
+
+export const PARTICIPANTS_ICON_SETS: IRoomActionButton[] = [
+  {
+    isActive: false,
+    title: 'Participants',
+    iconPath: '/icons/people.svg',
+  },
+  {
+    isActive: true,
+    title: 'Participants',
+    iconPath: '/icons/people.svg',
+  }
+]
