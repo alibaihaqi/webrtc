@@ -8,7 +8,7 @@
     <section class="flex-1 border-2 border-blue-800 p-2">
       <div
         v-for="participant in roomUsers"
-        :key="participant.userId"
+        :key="participant.connectionId"
         class="px-2 py-2 border-b border-white hover:bg-gray-600"
       >
         <p class="text-sm">
