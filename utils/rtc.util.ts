@@ -17,8 +17,7 @@ let streams: MediaStream[] = []
 export const getStreamPreview = async () => {
   const roomStore = useRoomStore()
   const config = useRuntimeConfig()
-  const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
-  console.log('isMuteVideo config', config.public.isMuteVideo)
+  const isMuteVideo = JSON.parse(config.public.isMuteVideo)
 
   const firebase = useFirebase()
   const username = firebase?.userInfo?.value?.displayName as string
