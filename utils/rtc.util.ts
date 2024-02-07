@@ -55,7 +55,7 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '', isMu
 
   const videoElement = document.createElement('video')
   videoElement.autoplay = true
-  videoElement.muted = isMuteVideo
+  // videoElement.muted = isMuteVideo
   videoElement.srcObject = stream
 
   if (socketId) {
