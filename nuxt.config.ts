@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     public: {
       apiDomain: '',
       isMuteVideo: '',
+      isProduction: '',
       wsDomain: '',
     },
   },
