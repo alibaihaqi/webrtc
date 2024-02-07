@@ -2,8 +2,9 @@
 import Peer from 'simple-peer/simplepeer.min.js'
 import type { SimplePeer } from 'simple-peer'
 
-import { useFirebase } from '@/composables/firebase'
+import { useFirebase } from '@/composables/firebase.composable'
 import { defaultMediaStreamConstraints, rtcPeerConfiguration } from '@/constants/rtc.constant'
+import type { IChatMessage } from '@/interfaces/room.interface'
 import { useRoomStore } from '@/stores/room.store'
 import {
   signalPeerData,
@@ -153,5 +154,18 @@ export const removePeerConnection = (connectionId: string) => {
       peers[connectionId].destroy()
       delete peers[connectionId]
     }
+  }
+}
+
+export const sendMessageUsingDataChannel = (message: IChatMessage) => {
+  concatNewMessage(message)
+  const stringifyMessage = JSON.stringify(message)
+
+  if (!message.isDirectMessage) {
+    for (let socketId in peers) {
+      peers[socketId].send(stringifyMessage)
+    }
+  } else {
+    peers[message.targetSocketId as string].send(stringifyMessage)
   }
 }
