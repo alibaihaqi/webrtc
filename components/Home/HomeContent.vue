@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import Button from '@/components/Common/Button.vue'
 import SignInButton from '@/components/Home/SignInButton.vue'
-import { useFirebase } from '@/composables/firebase'
+import { useFirebase } from '@/composables/firebase.composable'
 
 const firebase = useFirebase()
 const router = useRouter()
