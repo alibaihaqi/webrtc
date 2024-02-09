@@ -91,19 +91,10 @@ export const wsJoinRoom = (roomId: string, name: string) => {
 }
 
 export const signalPeerData = (data: any) => {
-  const roomStore = useRoomStore()
-
-  const isSignalConnectionSent = roomStore.signalConnections.filter((signalConnection) => {
-    return signalConnection.connectionId === data.connectionId && signalConnection?.signal?.type === data?.signal?.type
-  })
-
-  if (!isSignalConnectionSent.length) {
-    const message = {
-      action: 'message',
-      event: 'connection-signal',
-      data
-    }
-    socket?.send(constructMessage(message))
-    roomStore.setSignalConnections(data)
+  const message = {
+    action: 'message',
+    event: 'connection-signal',
+    data
   }
+  socket?.send(constructMessage(message))
 }
