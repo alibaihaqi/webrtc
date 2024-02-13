@@ -1,19 +1,3 @@
-<template>
-  <button
-    class="flex justify-center items-center border border-gray-500 py-2 px-4 gap-2 rounded hover:shadow-md hover:brightness-105"
-    @click="onClickButtonSigninPopup"
-  >
-    <nuxt-img
-      height="24"
-      width="24"
-      src="/imgs/google.png"
-    />
-    <span class="text-sm text-bold text-gray-800">
-      Sign in with Google
-    </span>
-  </button>
-</template>
-
 <script lang="ts" setup>
 import {
   GoogleAuthProvider,
@@ -34,3 +18,19 @@ const onClickButtonSigninPopup = async () => {
   }
 }
 </script>
+
+<template>
+  <button
+    class="flex justify-center items-center border border-gray-500 py-2 px-4 gap-2 rounded hover:shadow-md hover:brightness-105"
+    @click="onClickButtonSigninPopup"
+  >
+    <nuxt-img
+      height="24"
+      width="24"
+      src="/imgs/google.png"
+    />
+    <span class="text-sm text-bold text-gray-800">
+      Sign in with Google
+    </span>
+  </button>
+</template>

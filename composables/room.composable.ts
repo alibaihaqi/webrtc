@@ -1,0 +1,1 @@
+export const useChatMessage = () => useState<string>('chat-message', () => '')

@@ -13,6 +13,7 @@ export const useRoomStore = defineStore({
     isDisableToRoomButton: true,
     isHostMeeting: true,
     isMicrophoneActive: true,
+    isShowRoomChats: false,
     isShowParticipants: false,
     isVideoActive: true,
   }),
@@ -45,6 +46,9 @@ export const useRoomStore = defineStore({
     },
     setIsHostMeeting(value: boolean) {
       this.isHostMeeting = value
+    },
+    setIsShowRoomChats() {
+      this.isShowRoomChats = !this.isShowRoomChats
     },
     setIsShowParticipants() {
       this.isShowParticipants = !this.isShowParticipants

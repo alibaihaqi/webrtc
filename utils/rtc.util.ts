@@ -2,8 +2,9 @@
 import Peer from 'simple-peer/simplepeer.min.js'
 import type { SimplePeer } from 'simple-peer'
 
-import { useFirebase } from '@/composables/firebase'
+import { useFirebase } from '@/composables/firebase.composable'
 import { defaultMediaStreamConstraints, rtcPeerConfiguration } from '@/constants/rtc.constant'
+import type { IChatMessage } from '@/interfaces/room.interface'
 import { useRoomStore } from '@/stores/room.store'
 import {
   signalPeerData,
@@ -16,8 +17,6 @@ let streams: MediaStream[] = []
 
 export const getStreamPreview = async () => {
   const roomStore = useRoomStore()
-  const config = useRuntimeConfig()
-  const isMuteVideo = JSON.parse(config.public.isMuteVideo)
 
   const firebase = useFirebase()
   const username = firebase?.userInfo?.value?.displayName as string
@@ -25,7 +24,7 @@ export const getStreamPreview = async () => {
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
     
-    showVideoStream(localStream, roomStore.socketId, isMuteVideo)
+    showVideoStream(localStream, roomStore.socketId, true)
 
     roomStore.isHostMeeting
       ? wsCreateRoom(username)
@@ -55,7 +54,7 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '', isMu
 
   const videoElement = document.createElement('video')
   videoElement.autoplay = true
-  // videoElement.muted = isMuteVideo
+  videoElement.muted = isMuteVideo
   videoElement.srcObject = stream
 
   if (socketId) {
@@ -125,10 +124,7 @@ export const handleSignalingData = (data: any) => {
 }
 
 const addStream = (stream: MediaStream, connectedSocketId: string) => {
-  const config = useRuntimeConfig()
-  const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
-
-  showVideoStream(stream, connectedSocketId, isMuteVideo)
+  showVideoStream(stream, connectedSocketId, false)
 }
 
 export const concatNewMessage = (message: any) => {
@@ -153,5 +149,18 @@ export const removePeerConnection = (connectionId: string) => {
       peers[connectionId].destroy()
       delete peers[connectionId]
     }
+  }
+}
+
+export const sendMessageUsingDataChannel = (message: IChatMessage) => {
+  concatNewMessage(message)
+  const stringifyMessage = JSON.stringify(message)
+
+  if (!message.isDirectMessage) {
+    for (let socketId in peers) {
+      peers[socketId].send(stringifyMessage)
+    }
+  } else {
+    peers[message.targetSocketId as string].send(stringifyMessage)
   }
 }

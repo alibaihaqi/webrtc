@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import RoomButton from '@/components/Room/RoomButton.vue'
 import {
+  CHAT_ICON_SETS,
   MICROPHONE_ICON_SETS,
   PARTICIPANTS_ICON_SETS,
   VIDEO_ICON_SETS,
@@ -8,7 +9,7 @@ import {
 import type { TActionButton } from '@/interfaces/room.interface'
 import { useRoomStore } from '@/stores/room.store'
 
-const props = defineProps<{
+defineProps<{
   onLeaveMeetingRoom: any
 }>()
 const roomStore = useRoomStore()
@@ -40,6 +41,12 @@ const onButtonClickHandler = (action: TActionButton) => {
         :isActive="roomStore.isShowParticipants"
         :sources="PARTICIPANTS_ICON_SETS"
         @onClick="onButtonClickHandler('setIsShowParticipants')"
+      />
+      <RoomButton
+        class="hidden sm:inline-flex"
+        :isActive="roomStore.isShowRoomChats"
+        :sources="CHAT_ICON_SETS"
+        @onClick="onButtonClickHandler('setIsShowRoomChats')"
       />
     </section>
 
