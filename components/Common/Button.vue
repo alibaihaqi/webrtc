@@ -1,3 +1,18 @@
+<script lang="ts" setup>
+defineProps<{
+  disabled?: boolean
+  title: string
+  btnType?: string
+  size?: 'default' | 'medium' | 'small'
+}>()
+
+const emit = defineEmits(['onClick'])
+
+const onClickHandler = () => {
+  emit('onClick')
+}
+</script>
+
 <template>
   <button
     :class="`
@@ -13,21 +28,6 @@
     {{ title }}
   </button>
 </template>
-
-<script lang="ts" setup>
-defineProps<{
-  disabled?: boolean
-  title: string
-  btnType?: string
-  size?: 'default' | 'medium' | 'small'
-}>()
-
-const emit = defineEmits(['onClick'])
-
-const onClickHandler = () => {
-  emit('onClick')
-}
-</script>
 
 <style scoped>
 .btn-primary {

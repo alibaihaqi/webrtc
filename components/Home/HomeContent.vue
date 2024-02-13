@@ -1,3 +1,22 @@
+<script lang="ts" setup>
+import Button from '@/components/Common/Button.vue'
+import SignInButton from '@/components/Home/SignInButton.vue'
+import { useFirebase } from '@/composables/firebase.composable'
+
+const firebase = useFirebase()
+const router = useRouter()
+
+const onClickRoute = async (isHost: boolean = false) => {
+  const queryRoute = isHost ? '?host=true': ''
+ 
+  try {
+    await router.push(`/prepare${queryRoute}`)
+  } catch (error) {
+    console.log('route errorr:', error)
+  }
+}
+</script>
+
 <template>
   <section :class="`
       flex flex-col justify-around items-center w-[90%] h-96 px-8
@@ -44,22 +63,3 @@
     </div>
   </section>
 </template>
-
-<script lang="ts" setup>
-import Button from '@/components/Common/Button.vue'
-import SignInButton from '@/components/Home/SignInButton.vue'
-import { useFirebase } from '@/composables/firebase.composable'
-
-const firebase = useFirebase()
-const router = useRouter()
-
-const onClickRoute = async (isHost: boolean = false) => {
-  const queryRoute = isHost ? '?host=true': ''
- 
-  try {
-    await router.push(`/prepare${queryRoute}`)
-  } catch (error) {
-    console.log('route errorr:', error)
-  }
-}
-</script>
