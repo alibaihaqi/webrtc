@@ -1,3 +1,47 @@
+<script lang="ts" setup>
+import Button from '@/components/Common/Button.vue'
+import { useRoomStore } from '@/stores/room.store'
+import { checkAvailabilityRoom } from '@/utils/rest.util'
+import { disconnectWebSocket } from '@/utils/ws.util'
+
+const route = useRoute()
+const router = useRouter()
+const roomStore = useRoomStore()
+
+const roomId = ref('')
+
+const isHostMeeting = computed(() => route.query?.host === 'true')
+
+const generateTitle = computed(() => {
+  return isHostMeeting.value ? 'Host' : 'Join'
+})
+
+const onCancelButtonHandler = async () => {
+  disconnectWebSocket()
+  router.back()
+}
+
+const onClickButtonHandler = async () => {
+  try {
+    if (!isHostMeeting.value) {
+      const result: any = await checkAvailabilityRoom({
+        isHostMeeting: isHostMeeting.value,
+        roomId: roomId.value,
+      })
+
+      if (!result?.success) {
+        alert('Room is not found')
+        return
+      }
+    }
+
+    await router.replace('/room')
+  } catch (error) {
+    console.log('router error:', error)
+  }
+}
+</script>
+
 <template>
   <section
     :class="`
@@ -32,7 +76,7 @@
         class="flex-1"
         title="Cancel"
         btn-type="secondary"
-        @on-click="router.back"
+        @on-click="onCancelButtonHandler"
       />
       <Button
         class="flex-1"
@@ -43,46 +87,3 @@
     </div>
   </section>
 </template>
-
-<script lang="ts" setup>
-import Button from '@/components/Common/Button.vue'
-import { useRoomStore } from '@/stores/room.store'
-import { checkAvailabilityRoom } from '@/utils/rest.util'
-import { initiateSocket } from '@/utils/ws.util';
-
-const route = useRoute()
-const router = useRouter()
-const roomStore = useRoomStore()
-
-const roomId = ref('')
-
-const isHostMeeting = computed(() => route.query?.host === 'true')
-
-const generateTitle = computed(() => {
-  return isHostMeeting.value ? 'Host' : 'Join'
-})
-
-onMounted(() => {
-  initiateSocket()
-})
-
-const onClickButtonHandler = async () => {
-  try {
-    if (!isHostMeeting.value) {
-      const result: any = await checkAvailabilityRoom({
-        isHostMeeting: isHostMeeting.value,
-        roomId: roomId.value,
-      })
-
-      if (!result?.success) {
-        alert('Room is not found')
-        return
-      }
-    }
-
-    await router.replace('/room')
-  } catch (error) {
-    console.log('router error:', error)
-  }
-}
-</script>
