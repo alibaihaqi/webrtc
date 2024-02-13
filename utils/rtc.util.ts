@@ -17,8 +17,6 @@ let streams: MediaStream[] = []
 
 export const getStreamPreview = async () => {
   const roomStore = useRoomStore()
-  const config = useRuntimeConfig()
-  const isMuteVideo = JSON.parse(config.public.isMuteVideo)
 
   const firebase = useFirebase()
   const username = firebase?.userInfo?.value?.displayName as string
@@ -26,7 +24,7 @@ export const getStreamPreview = async () => {
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
     
-    showVideoStream(localStream, roomStore.socketId, isMuteVideo)
+    showVideoStream(localStream, roomStore.socketId, true)
 
     roomStore.isHostMeeting
       ? wsCreateRoom(username)
@@ -126,10 +124,7 @@ export const handleSignalingData = (data: any) => {
 }
 
 const addStream = (stream: MediaStream, connectedSocketId: string) => {
-  const config = useRuntimeConfig()
-  const isMuteVideo = JSON.parse(config.public.isMuteVideo || 'true')
-
-  showVideoStream(stream, connectedSocketId, isMuteVideo)
+  showVideoStream(stream, connectedSocketId, false)
 }
 
 export const concatNewMessage = (message: any) => {
