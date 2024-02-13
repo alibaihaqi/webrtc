@@ -54,6 +54,7 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '', isMu
 
   const videoElement = document.createElement('video')
   videoElement.autoplay = true
+  videoElement.playsInline = true // to disable iPhone trigger full screen
   videoElement.muted = isMuteVideo
   videoElement.srcObject = stream
 
