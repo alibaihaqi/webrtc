@@ -21,6 +21,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useFirebase } from '@/composables/firebase.composable'
 import { useChatMessage } from '@/composables/room.composable'
 import type { IChatMessage } from '@/interfaces/room.interface'
 import { sendMessageUsingDataChannel } from '@/utils/rtc.util'
@@ -28,6 +29,7 @@ import { sendMessageUsingDataChannel } from '@/utils/rtc.util'
 const props = defineProps<{
   authorSocketId: string
 }>()
+const firebase = useFirebase()
 const message = useChatMessage()
 
 const onPressInputHandler = (event: KeyboardEvent) => {
@@ -42,7 +44,7 @@ const onSendMessageHandler = () => {
 
   const messageData: IChatMessage = {
     socketId: props.authorSocketId,
-    name: '',
+    name: firebase?.userInfo.value?.displayName || '',
     content: message.value,
   }
 
