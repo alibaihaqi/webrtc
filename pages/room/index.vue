@@ -1,10 +1,3 @@
-<template>
-  <CommonLayout class="flex-col justify-center">
-    <RoomContent />
-    <RoomFooter :on-leave-meeting-room="onLeaveMeetingRoom" />
-  </CommonLayout>
-</template>
-
 <script lang="ts" setup>
 import CommonLayout from '@/components/Layout/CommonLayout.vue'
 import RoomContent from '@/components/Room/RoomContent.vue'
@@ -39,3 +32,10 @@ onUnmounted(() => {
   onLeaveMeetingRoom()
 })
 </script>
+
+<template>
+  <CommonLayout class="flex-col justify-center">
+    <RoomContent />
+    <RoomFooter :on-leave-meeting-room="onLeaveMeetingRoom" />
+  </CommonLayout>
+</template>
