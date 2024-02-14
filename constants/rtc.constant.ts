@@ -13,5 +13,8 @@ export const rtcPeerConfiguration = {
 
 export const defaultMediaStreamConstraints = {
   audio: true,
-  video: true,
+  video: {
+    width: 480,
+    height: 360,
+  },
 }
