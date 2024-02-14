@@ -21,7 +21,7 @@ const onClickHandler = () => {
   <div
     :class="`
       w-24 sm:w-28 flex flex-col items-center gap-1 hover:bg-gray-700
-      pt-2 pb-1 px-4 sm:px-6 rounded-md
+      pt-2 pb-1 px-4 sm:px-6 rounded-md cursor-pointer
     `"
     @click="onClickHandler"
   >

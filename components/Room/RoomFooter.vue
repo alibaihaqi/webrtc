@@ -20,7 +20,7 @@ const onButtonClickHandler = (action: TActionButton) => {
 </script>
 
 <template>
-  <footer class="flex justify-around sm:justify-between items-center bg-gray-900 pt-1">
+  <footer class="flex justify-around sm:justify-between items-center bg-gray-900 pt-1 select-none">
     <section class="flex gap-1 sm:gap-2">
       <RoomButton
         :isActive="roomStore.isMicrophoneActive"
