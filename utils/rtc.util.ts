@@ -24,7 +24,7 @@ export const getStreamPreview = async () => {
   try {
     localStream = await openMediaDevices(defaultMediaStreamConstraints)
     
-    showVideoStream(localStream, roomStore.socketId, true)
+    showVideoStream(localStream, roomStore.socketId, true, 0)
 
     roomStore.isHostMeeting
       ? wsCreateRoom(username)
@@ -45,7 +45,7 @@ const getConnectedDevices = async (type: string) => {
   return devices.filter(device => device.kind === type)
 }
 
-export const showVideoStream = (stream: MediaStream, socketId: string = '', isMuteVideo: boolean = true) => {
+export const showVideoStream = (stream: MediaStream, socketId: string = '', isMuteVideo: boolean = true, videoVolume: number = 1) => {
   const videosContainer = document.getElementById('videos_container')
   videosContainer?.classList.add('videos_container_styles')
 
@@ -55,6 +55,7 @@ export const showVideoStream = (stream: MediaStream, socketId: string = '', isMu
   const videoElement = document.createElement('video')
   videoElement.autoplay = true
   videoElement.playsInline = true // to disable iPhone trigger full screen
+  videoElement.volume = videoVolume
   videoElement.muted = isMuteVideo
   videoElement.srcObject = stream
 
