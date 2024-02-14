@@ -1,15 +1,50 @@
 <template>
-  <div class="self-center py-1 px-4 sm:px-8 mt-2 rounded-md">
-    <p class="text-sm text-white">
-      Room ID: <span class="hover:text-blue-400 hover:cursor-pointer">
-        {{ roomStore.roomId }}
-      </span>
-    </p>
-  </div>
+  <header class="flex justify-center items-center bg-gray-800 select-none">
+    <div class="py-1 px-4 sm:px-8 mt-2 rounded-md">
+      <p class="text-sm text-white">
+        <span>Room ID: </span>
+        <span
+          class="hover:text-blue-400 hover:cursor-pointer"
+          @click="onClickRoomId"
+        >
+          {{ roomId }}
+        </span>
+      </p>
+    </div>
+
+    <ClientOnly>
+      <Teleport to="body">
+        <section
+          v-if="isShowAlert"
+          class="absolute flex justify-center top-2 right-0 left-0 w-full"
+        >
+          <div class="w-[90%] sm:w-[50%] bg-blue-500 text-center rounded-md py-1 px-2 text-sm text-white">
+            <span>Copy Room ID: </span>
+            <span>{{ roomId }}</span>
+          </div>
+        </section>
+      </Teleport>
+    </ClientOnly>
+  </header>
 </template>
 
 <script lang="ts" setup>
-import { useRoomStore } from '@/stores/room.store'
+const props = defineProps<{
+  roomId: string
+}>()
 
-const roomStore = useRoomStore()
+const isShowAlert = ref(false)
+
+const onClickRoomId = async () => {
+  try {
+    await navigator.clipboard.writeText(props.roomId)
+    isShowAlert.value = true
+
+    setTimeout(() => {
+      isShowAlert.value = false
+    }, 2000);
+  } catch (error) {
+    console.log('Error copy text:', error)
+  }
+}
 </script>
