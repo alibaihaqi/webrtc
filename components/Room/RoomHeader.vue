@@ -1,6 +1,6 @@
 <template>
-  <header class="flex justify-center items-center bg-gray-800 select-none">
-    <div class="py-1 px-4 sm:px-8 mt-2 rounded-md">
+  <header class="flex justify-center items-center bg-gray-800 select-none py-2 px-4 sm:px-8">
+    <div class="rounded-md">
       <p class="text-sm text-white">
         <span>Room ID: </span>
         <span

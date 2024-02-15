@@ -6,6 +6,6 @@
 
 <style>
 .common-layout {
-  @apply flex h-screen h-svh;
+  @apply flex min-h-screen min-h-svh;
 }
 </style>
