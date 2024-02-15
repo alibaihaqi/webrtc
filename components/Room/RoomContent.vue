@@ -39,6 +39,25 @@ const isOpenContentChatParticipants = computed(() => {
 }
 
 .video_container_style {
-  @apply flex justify-center
+  @apply flex flex-col justify-end w-[60%]
+}
+
+.video_container_style:first-child:nth-last-child(1) {
+  @apply w-full
+}
+
+.video_container_style:first-child:nth-last-child(2),
+.video_container_style:first-child:nth-last-child(2) ~ .video_container_style {
+  @apply w-[48%] h-[48%]
+}
+
+.video_container_style:first-child:nth-last-child(3),
+.video_container_style:first-child:nth-last-child(3) ~ .video_container_style {
+  @apply w-[48%] h-[48%]
+}
+
+.video_container_style:first-child:nth-last-child(4),
+.video_container_style:first-child:nth-last-child(4) ~ .video_container_style {
+  @apply w-[48%] h-[48%]
 }
 </style>
