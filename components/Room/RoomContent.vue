@@ -43,7 +43,7 @@ const isOpenContentChatParticipants = computed(() => {
 }
 
 .video_container_style:first-child:nth-last-child(1) {
-  @apply w-full
+  @apply w-[80%]
 }
 
 .video_container_style:first-child:nth-last-child(2),
