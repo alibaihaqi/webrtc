@@ -35,11 +35,11 @@ const isOpenContentChatParticipants = computed(() => {
 
 <style>
 .videos_container_styles {
-  @apply flex flex-1 flex-col sm:flex-row flex-wrap max-w-[98%] mx-auto gap-2 justify-center
+  @apply flex flex-1 flex-col sm:flex-row flex-wrap max-w-[98%] mx-auto gap-2 justify-center items-center
 }
 
 .video_container_style {
-  @apply flex flex-col justify-end w-[60%]
+  @apply flex flex-col
 }
 
 .video_container_style:first-child:nth-last-child(1) {
@@ -53,7 +53,7 @@ const isOpenContentChatParticipants = computed(() => {
 
 .video_container_style:first-child:nth-last-child(3),
 .video_container_style:first-child:nth-last-child(3) ~ .video_container_style {
-  @apply w-[48%] h-[48%]
+  @apply w-[40%] h-[40%]
 }
 
 .video_container_style:first-child:nth-last-child(4),
