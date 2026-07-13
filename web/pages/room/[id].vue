@@ -1,0 +1,145 @@
+<template>
+  <div class="h-screen flex flex-col bg-gray-900">
+    <RoomHeader
+      :room-name="roomId"
+      :participant-count="participantCount"
+      :status="connectionStatus"
+    />
+
+    <div class="flex-1 overflow-hidden">
+      <VideoGrid
+        :local-stream="localStream"
+        :remote-stream="remoteStream"
+      />
+    </div>
+
+    <RoomFooter
+      :is-muted="isMuted"
+      :is-video-off="isVideoOff"
+      @toggle-mute="toggleMute"
+      @toggle-video="toggleVideo"
+      @hangup="handleHangup"
+    />
+
+    <div v-if="error" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg">
+      {{ error }}
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useWebRTC } from '~/composables/useWebRTC'
+import { useSignaling } from '~/composables/useSignaling'
+
+const route = useRoute()
+const router = useRouter()
+const roomId = route.params.id as string
+
+const {
+  connectionState,
+  localStream,
+  remoteStream,
+  error: webrtcError,
+  getMedia,
+  createOffer,
+  handleAnswer,
+  addIceCandidate,
+  hangup,
+  toggleMute,
+  toggleVideo,
+  isMuted,
+  isVideoOff,
+} = useWebRTC()
+
+const {
+  isConnected,
+  error: signalingError,
+  connect,
+  send,
+  disconnect,
+} = useSignaling()
+
+const participantCount = ref(1)
+const connectionStatus = computed(() => {
+  if (webrtcError.value || signalingError.value) return 'error'
+  if (connectionState.value === 'connected') return 'connected'
+  if (connectionState.value === 'connecting' || connectionState.value === 'signaling') return 'connecting'
+  if (connectionState.value === 'reconnecting') return 'reconnecting'
+  return 'idle'
+})
+
+const error = computed(() => webrtcError.value || signalingError.value)
+
+onMounted(async () => {
+  await getMedia()
+
+  connect(roomId, 'user-id', 'User')
+
+  window.addEventListener('signaling-message', handleSignalingMessage)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('signaling-message', handleSignalingMessage)
+  disconnect()
+  hangup()
+})
+
+function handleSignalingMessage(event: Event) {
+  const message = (event as CustomEvent).detail
+
+  switch (message.type) {
+    case 'room-joined':
+      participantCount.value = message.participants.length
+      if (message.participants.length > 1) {
+        createOffer().then(offer => {
+          send({
+            type: 'offer',
+            roomId,
+            from: 'user-id',
+            sdp: offer,
+          })
+        })
+      }
+      break
+
+    case 'participant-joined':
+      participantCount.value++
+      break
+
+    case 'participant-left':
+      participantCount.value--
+      break
+
+    case 'offer':
+      handleAnswer(message.sdp).then(answer => {
+        send({
+          type: 'answer',
+          roomId,
+          from: 'user-id',
+          sdp: answer,
+        })
+      })
+      break
+
+    case 'answer':
+      handleAnswer(message.sdp)
+      break
+
+    case 'ice-candidate':
+      addIceCandidate(message.candidate)
+      break
+  }
+}
+
+function handleHangup() {
+  send({
+    type: 'leave-room',
+    roomId,
+    from: 'user-id',
+  })
+  hangup()
+  disconnect()
+  router.push('/')
+}
+</script>

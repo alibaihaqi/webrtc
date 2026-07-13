@@ -1,0 +1,10 @@
+{
+  "name": "webrtc-video-call",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter './**' dev",
+    "build": "pnpm --filter './**' build",
+    "test": "pnpm --filter './**' test",
+    "lint": "pnpm --filter './**' lint"
+  }
+}
