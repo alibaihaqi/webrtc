@@ -10,20 +10,24 @@ export interface SignalMessage {
   [key: string]: unknown
 }
 
+const RECONNECT_MAX_ATTEMPTS = 5
+const RECONNECT_BASE_DELAY = 1000
+const RECONNECT_MAX_DELAY = 16000
+
 export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
   const isConnected = ref(false)
   const error: Ref<string | null> = ref(null)
   const lastMessage: Ref<SignalMessage | null> = ref(null)
   const reconnecting = ref(false)
   const reconnectAttempts = ref(0)
+  const reconnectFailed = ref(false)
   const reconnectTimer: Ref<ReturnType<typeof setTimeout> | null> = ref(null)
 
   let ws: WebSocket | null = null
-  let maxReconnectAttempts = 5
-  let maxReconnectDelay = 30000
-  let reconnectDelay = 1000
+  let userInitiatedClose = false
 
   function connect(roomId: string, userId: string, displayName: string) {
+    userInitiatedClose = false
     const config = useRuntimeConfig()
     const wsUrl = config.public.wsUrl
 
@@ -33,6 +37,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
       isConnected.value = true
       reconnecting.value = false
       reconnectAttempts.value = 0
+      reconnectFailed.value = false
       cleanupReconnectTimer()
       console.log('WebSocket connected')
     }
@@ -51,15 +56,23 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
       isConnected.value = false
       console.log('WebSocket disconnected')
 
-      if (reconnectAttempts.value < maxReconnectAttempts) {
+      if (reconnectAttempts.value < RECONNECT_MAX_ATTEMPTS && !userInitiatedClose) {
         reconnecting.value = true
-        const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts.value), maxReconnectDelay)
+        const delay = Math.min(
+          RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts.value),
+          RECONNECT_MAX_DELAY
+        )
+        console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.value + 1}/${RECONNECT_MAX_ATTEMPTS})`)
+        
         reconnectTimer.value = setTimeout(() => {
           reconnectAttempts.value++
           connect(roomId, userId, displayName)
         }, delay)
       } else {
         reconnecting.value = false
+        if (reconnectAttempts.value >= RECONNECT_MAX_ATTEMPTS) {
+          reconnectFailed.value = true
+        }
       }
     }
 
@@ -83,6 +96,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
   }
 
   function disconnect() {
+    userInitiatedClose = true
     cleanupReconnectTimer()
     if (ws) {
       ws.close()
@@ -90,7 +104,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
     }
     isConnected.value = false
     reconnecting.value = false
-    reconnectAttempts.value = maxReconnectAttempts
+    reconnectFailed.value = false
   }
 
   onUnmounted(() => {
@@ -103,6 +117,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
     lastMessage,
     reconnecting: readonly(reconnecting),
     reconnectAttempts: readonly(reconnectAttempts),
+    reconnectFailed: readonly(reconnectFailed),
     connect,
     send,
     disconnect,
