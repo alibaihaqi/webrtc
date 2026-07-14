@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from 'ws'
 import { IncomingMessage } from 'http'
 import { RoomManager } from './state.js'
+import { captureMetric, captureError } from './monitoring/apm.js'
 import type {
   ClientMessage,
   ServerMessage,
@@ -63,6 +64,7 @@ export class SignalingServer {
 
       ws.on('error', (error) => {
         console.error('WebSocket error:', error)
+        captureError(error)
         this.handleDisconnect(ws)
       })
     })
@@ -121,6 +123,8 @@ export class SignalingServer {
 
     this.clients.set(ws, { userId: from, roomId })
 
+    captureMetric('room.joined', 1, { roomId })
+
     const participants = this.roomManager.getParticipants(roomId)
     this.send(ws, {
       type: 'room-joined',
@@ -150,6 +154,8 @@ export class SignalingServer {
     const { roomId, userId } = clientInfo
     this.roomManager.leaveRoom(roomId, userId)
     this.clients.delete(ws)
+
+    captureMetric('room.left', 1, { roomId })
 
     this.broadcast(roomId, {
       type: 'participant-left',
@@ -181,6 +187,8 @@ export class SignalingServer {
     const { roomId, userId } = clientInfo
     this.roomManager.leaveRoom(roomId, userId)
     this.clients.delete(ws)
+
+    captureMetric('websocket.disconnected', 1, { roomId })
 
     this.broadcast(roomId, {
       type: 'participant-left',

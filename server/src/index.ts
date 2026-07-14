@@ -2,6 +2,9 @@ import { createServer } from 'http'
 import { WebSocketServer } from 'ws'
 import { SignalingServer } from './signaling.js'
 import { generateTurnCredentials, getTurnConfig } from './turn/credentials.js'
+import { initAPM, captureMetric } from './monitoring/apm.js'
+
+initAPM()
 
 const PORT = parseInt(process.env.WS_PORT || '3001', 10)
 
@@ -42,5 +45,9 @@ const signaling = new SignalingServer(wss)
 server.listen(PORT, () => {
   console.log(`Signaling server running on port ${PORT}`)
 })
+
+setInterval(() => {
+  captureMetric('websocket.connections', signaling.getClientCount())
+}, 30_000)
 
 export { server, wss, signaling }
