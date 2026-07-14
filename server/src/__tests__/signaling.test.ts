@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { SignalingServer } from '../signaling'
 import { WebSocketServer, WebSocket } from 'ws'
 import { createServer, Server } from 'http'
@@ -308,5 +308,74 @@ describe('SignalingServer', () => {
     client2.on('message', () => { received = true })
     await new Promise((r) => setTimeout(r, 100))
     expect(received).toBe(false)
+  })
+})
+
+describe('Heartbeat', () => {
+  let httpServer: Server
+  let wss: WebSocketServer
+  let signaling: SignalingServer
+  let port: number
+
+  beforeEach(async () => {
+    httpServer = createServer()
+    wss = new WebSocketServer({ server: httpServer })
+    signaling = new SignalingServer(wss)
+    await new Promise<void>((resolve) => httpServer.listen(0, resolve))
+    port = (httpServer.address() as any).port
+  })
+
+  afterEach(async () => {
+    vi.useRealTimers()
+    wss.close()
+    await new Promise<void>((resolve) => httpServer.close(() => resolve()))
+  })
+
+  function createClient(): Promise<WebSocket> {
+    return new Promise((resolve) => {
+      const ws = new WebSocket(`ws://localhost:${port}`)
+      ws.on('open', () => resolve(ws))
+    })
+  }
+
+  function waitForMessage(ws: WebSocket): Promise<any> {
+    return new Promise((resolve) => {
+      ws.once('message', (data) => resolve(JSON.parse(data.toString())))
+    })
+  }
+
+  function joinRoom(ws: WebSocket, roomId: string, userId: string, displayName: string) {
+    ws.send(JSON.stringify({
+      type: 'join-room',
+      roomId,
+      from: userId,
+      displayName,
+      timestamp: Date.now(),
+    }))
+  }
+
+  it('sends ping to client after heartbeat interval', async () => {
+    vi.useFakeTimers()
+    const client = await createClient()
+
+    const pingReceived = new Promise<void>((resolve) => {
+      client.on('ping', () => resolve())
+    })
+
+    vi.advanceTimersByTime(30_000)
+    await pingReceived
+
+    client.terminate()
+  })
+
+  it('does not interfere with normal connection lifecycle', async () => {
+    const client = await createClient()
+
+    joinRoom(client, 'room-hb', 'user-hb', 'Heartbeat User')
+    const msg = await waitForMessage(client)
+    expect(msg.type).toBe('room-joined')
+    expect(msg.participants).toHaveLength(1)
+
+    client.close()
   })
 })

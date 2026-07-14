@@ -7,6 +7,9 @@ import type {
   ParticipantInfo,
 } from './protocol.js'
 
+const HEARTBEAT_INTERVAL = 30_000
+const HEARTBEAT_TIMEOUT = 10_000
+
 export class SignalingServer {
   private wss: WebSocketServer
   private roomManager: RoomManager
@@ -18,9 +21,32 @@ export class SignalingServer {
     this.setupConnectionHandler()
   }
 
+  private startHeartbeat(ws: WebSocket): void {
+    const isAlive = { value: true }
+
+    ws.on('pong', () => {
+      isAlive.value = true
+    })
+
+    const interval = setInterval(() => {
+      if (!isAlive.value) {
+        console.log('WebSocket heartbeat timeout, terminating')
+        ws.terminate()
+        return
+      }
+      isAlive.value = false
+      ws.ping()
+    }, HEARTBEAT_INTERVAL)
+
+    ws.on('close', () => {
+      clearInterval(interval)
+    })
+  }
+
   private setupConnectionHandler(): void {
     this.wss.on('connection', (ws: WebSocket, _req: IncomingMessage) => {
       console.log('New WebSocket connection')
+      this.startHeartbeat(ws)
 
       ws.on('message', (data: Buffer) => {
         try {
