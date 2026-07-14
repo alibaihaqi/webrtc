@@ -1,6 +1,7 @@
 import { ref, readonly, onUnmounted } from 'vue'
 import type { Ref } from 'vue'
 import { useMedia } from './useMedia'
+import { useRuntimeConfig } from '#app'
 
 export type ConnectionState = 'new' | 'signaling' | 'connecting' | 'connected' | 'closed' | 'failed' | 'reconnecting'
 export type IceState = 'new' | 'checking' | 'connected' | 'completed' | 'failed' | 'disconnected' | 'closed'
@@ -31,6 +32,23 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
   let peerConnection: RTCPeerConnection | null = null
   const pendingCandidates: RTCIceCandidateInit[] = []
 
+  async function fetchTurnCredentials(): Promise<RTCIceServer[]> {
+    try {
+      const config = useRuntimeConfig()
+      const response = await fetch(`${config.public.apiUrl}/turn-credentials`)
+      const data = await response.json()
+
+      return [{
+        urls: data.urls,
+        username: data.username,
+        credential: data.credential,
+      }]
+    } catch (e) {
+      console.error('Failed to fetch TURN credentials:', e)
+      return []
+    }
+  }
+
   function replaceTrack(kind: 'audio' | 'video', newTrack: MediaStreamTrack): void {
     if (!peerConnection) return
 
@@ -52,8 +70,16 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
     }) as EventListener)
   }
 
-  function createPeerConnection() {
-    peerConnection = new RTCPeerConnection(iceConfig)
+  async function createPeerConnection() {
+    const turnServers = await fetchTurnCredentials()
+
+    peerConnection = new RTCPeerConnection({
+      ...iceConfig,
+      iceServers: [
+        ...(iceConfig?.iceServers || []),
+        ...turnServers,
+      ],
+    })
 
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
@@ -115,7 +141,7 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
       if (peerConnection) {
         peerConnection.close()
       }
-      createPeerConnection()
+      await createPeerConnection()
 
       stream.getTracks().forEach(track => {
         peerConnection?.addTrack(track, stream)
@@ -159,7 +185,7 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
 
   async function createOffer(): Promise<RTCSessionDescriptionInit> {
     connectionState.value = 'signaling'
-    if (!peerConnection) createPeerConnection()
+    if (!peerConnection) await createPeerConnection()
 
     const offer = await peerConnection!.createOffer()
     await peerConnection!.setLocalDescription(offer)
@@ -167,12 +193,12 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
   }
 
   async function handleAnswer(answer: RTCSessionDescriptionInit): Promise<void> {
-    if (!peerConnection) createPeerConnection()
+    if (!peerConnection) await createPeerConnection()
     await peerConnection!.setRemoteDescription(answer)
   }
 
   async function addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    if (!peerConnection) createPeerConnection()
+    if (!peerConnection) await createPeerConnection()
 
     if (peerConnection!.remoteDescription) {
       await peerConnection!.addIceCandidate(candidate)

@@ -1,7 +1,7 @@
 import { createServer } from 'http'
 import { WebSocketServer } from 'ws'
 import { SignalingServer } from './signaling.js'
-import { generateTurnCredentials } from './turn/credentials.js'
+import { generateTurnCredentials, getTurnConfig } from './turn/credentials.js'
 
 const PORT = parseInt(process.env.WS_PORT || '3001', 10)
 
@@ -21,8 +21,14 @@ const server = createServer((req, res) => {
     }
 
     const { username, credential } = generateTurnCredentials(secretKey)
+    const turnConfig = getTurnConfig()
+
     res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({ username, credential }))
+    res.end(JSON.stringify({
+      username,
+      credential,
+      urls: turnConfig.urls,
+    }))
     return
   }
 

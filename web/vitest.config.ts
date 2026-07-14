@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       '~': resolve(__dirname),
       '@': resolve(__dirname),
+      '#app': resolve(__dirname, 'composables/__mocks__/app.ts'),
     },
   },
   esbuild: {

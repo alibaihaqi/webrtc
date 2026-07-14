@@ -33,6 +33,13 @@ describe('useWebRTC', () => {
       remoteDescription: null,
     }
     vi.stubGlobal('RTCPeerConnection', vi.fn(() => mockPeerConnection))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({
+        username: '12345:user',
+        credential: 'mock-credential',
+        urls: ['turn:localhost:3478'],
+      }),
+    }))
   })
 
   it('creates an offer', async () => {
@@ -75,6 +82,49 @@ describe('useWebRTC', () => {
 
     expect(mockPeerConnection.close).toHaveBeenCalled()
     expect(connectionState.value).toBe('closed')
+  })
+
+  describe('TURN credentials', () => {
+    it('fetches TURN credentials when creating peer connection', async () => {
+      const fetchSpy = vi.mocked(globalThis.fetch)
+      const { createOffer } = useWebRTC()
+      await createOffer()
+
+      expect(fetchSpy).toHaveBeenCalledWith('http://localhost:3001/turn-credentials')
+    })
+
+    it('passes TURN servers to RTCPeerConnection', async () => {
+      const { createOffer } = useWebRTC()
+      await createOffer()
+
+      expect(RTCPeerConnection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iceServers: expect.arrayContaining([
+            expect.objectContaining({
+              urls: ['turn:localhost:3478'],
+              username: '12345:user',
+              credential: 'mock-credential',
+            }),
+          ]),
+        })
+      )
+    })
+
+    it('gracefully handles fetch failure', async () => {
+      vi.mocked(globalThis.fetch).mockRejectedValueOnce(new Error('Network error'))
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const { createOffer } = useWebRTC()
+      await createOffer()
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch TURN credentials:', expect.any(Error))
+      expect(RTCPeerConnection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iceServers: [],
+        })
+      )
+      consoleSpy.mockRestore()
+    })
   })
 
   describe('ICE restart', () => {
