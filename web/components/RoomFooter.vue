@@ -31,6 +31,8 @@
       </svg>
     </button>
 
+    <DeviceSelector />
+
     <button
       @click="$emit('hangup')"
       class="p-3 rounded-full bg-red-600 hover:bg-red-700 transition-colors"
@@ -43,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import DeviceSelector from './DeviceSelector.vue'
+
 defineProps<{
   isMuted: boolean
   isVideoOff: boolean

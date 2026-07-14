@@ -11,7 +11,7 @@ describe('RoomFooter', () => {
       },
     })
 
-    expect(wrapper.findAll('button')).toHaveLength(3)
+    expect(wrapper.findAll('button')).toHaveLength(4)
   })
 
   it('emits toggleMute event', async () => {
@@ -46,7 +46,7 @@ describe('RoomFooter', () => {
       },
     })
 
-    await wrapper.findAll('button')[2].trigger('click')
+    await wrapper.findAll('button')[3].trigger('click')
     expect(wrapper.emitted('hangup')).toBeTruthy()
   })
 })
