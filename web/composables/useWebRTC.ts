@@ -25,6 +25,9 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
   const maxReconnectAttempts = 3
   const reconnectDelay = 2000
 
+  const ICE_RESTART_MAX_ATTEMPTS = 3
+  const iceRestartAttempts = ref(0)
+
   let peerConnection: RTCPeerConnection | null = null
   const pendingCandidates: RTCIceCandidateInit[] = []
 
@@ -47,7 +50,22 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
     }
 
     peerConnection.oniceconnectionstatechange = () => {
-      iceState.value = peerConnection?.iceConnectionState as IceState
+      const state = peerConnection?.iceConnectionState as IceState
+      iceState.value = state
+
+      if (state === 'failed' || state === 'disconnected') {
+        console.log(`ICE connection ${state}, attempting restart`)
+        iceRestart().then(success => {
+          if (!success) {
+            error.value = 'ICE connection failed, reconnecting...'
+            window.dispatchEvent(new CustomEvent('ice-reconnect-needed'))
+          }
+        })
+      }
+
+      if (state === 'connected' || state === 'completed') {
+        iceRestartAttempts.value = 0
+      }
     }
 
     return peerConnection
@@ -84,6 +102,30 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
       return true
     } catch (e) {
       error.value = 'Reconnection failed'
+      return false
+    }
+  }
+
+  async function iceRestart(): Promise<boolean> {
+    if (iceRestartAttempts.value >= ICE_RESTART_MAX_ATTEMPTS) {
+      console.log('Max ICE restart attempts reached, falling back to full reconnect')
+      return false
+    }
+
+    if (!peerConnection) return false
+
+    iceRestartAttempts.value++
+    console.log(`ICE restart attempt ${iceRestartAttempts.value}/${ICE_RESTART_MAX_ATTEMPTS}`)
+
+    try {
+      const offer = await peerConnection.createOffer({ iceRestart: true })
+      await peerConnection.setLocalDescription(offer)
+
+      window.dispatchEvent(new CustomEvent('ice-restart-offer', { detail: offer }))
+
+      return true
+    } catch (e) {
+      console.error('ICE restart failed:', e)
       return false
     }
   }
@@ -171,5 +213,7 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
     maxReconnectAttempts,
     attemptReconnect,
     resetReconnectAttempts,
+    iceRestartAttempts: readonly(iceRestartAttempts),
+    iceRestart,
   }
 }
