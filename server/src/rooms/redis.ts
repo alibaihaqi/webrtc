@@ -8,6 +8,12 @@ const CLEANUP_DELAY = 30 // 30 seconds after last participant leaves
 export class RedisRoomManager {
   private cleanupTimers: Map<string, NodeJS.Timeout> = new Map()
 
+  constructor() {
+    if (!getRedisClient()) {
+      throw new Error('Redis not available')
+    }
+  }
+
   private getRedis() {
     return getRedisClient()
   }
