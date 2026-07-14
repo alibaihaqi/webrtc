@@ -26,8 +26,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
   let ws: WebSocket | null = null
   let userInitiatedClose = false
 
-  function connect(roomId: string, userId: string, displayName: string) {
-    userInitiatedClose = false
+  function initWebSocket(roomId: string, userId: string, displayName: string) {
     const config = useRuntimeConfig()
     const wsUrl = config.public.wsUrl
 
@@ -66,7 +65,7 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
         
         reconnectTimer.value = setTimeout(() => {
           reconnectAttempts.value++
-          connect(roomId, userId, displayName)
+          initWebSocket(roomId, userId, displayName)
         }, delay)
       } else {
         reconnecting.value = false
@@ -80,6 +79,14 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
       error.value = 'WebSocket error'
       console.error('WebSocket error:', e)
     }
+  }
+
+  function connect(roomId: string, userId: string, displayName: string) {
+    userInitiatedClose = false
+    reconnectAttempts.value = 0
+    reconnectFailed.value = false
+    cleanupReconnectTimer()
+    initWebSocket(roomId, userId, displayName)
   }
 
   function send(message: Omit<SignalMessage, 'timestamp'>) {
