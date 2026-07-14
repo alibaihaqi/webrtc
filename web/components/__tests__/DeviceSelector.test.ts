@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import DeviceSelector from '../DeviceSelector.vue'
 import { useMedia } from '../../composables/useMedia'
 
@@ -8,9 +9,9 @@ const mockSwitchMicrophone = vi.fn().mockResolvedValue(true)
 
 vi.mock('../../composables/useMedia', () => ({
   useMedia: vi.fn(() => ({
-    devices: { value: [] },
-    activeCameraId: { value: '' },
-    activeMicrophoneId: { value: '' },
+    devices: ref([]),
+    activeCameraId: ref(''),
+    activeMicrophoneId: ref(''),
     switchCamera: mockSwitchCamera,
     switchMicrophone: mockSwitchMicrophone,
   })),
@@ -20,12 +21,12 @@ describe('DeviceSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [] },
-      activeCameraId: { value: '' },
-      activeMicrophoneId: { value: '' },
+      devices: ref([]),
+      activeCameraId: ref(''),
+      activeMicrophoneId: ref(''),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
   })
 
   it('renders toggle button', () => {
@@ -79,15 +80,15 @@ describe('DeviceSelector with devices', () => {
 
   it('renders camera options from devices', async () => {
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [
+      devices: ref([
         { deviceId: 'cam1', kind: 'videoinput', label: 'Front Camera' } as MediaDeviceInfo,
         { deviceId: 'mic1', kind: 'audioinput', label: 'Built-in Mic' } as MediaDeviceInfo,
-      ]},
-      activeCameraId: { value: 'cam1' },
-      activeMicrophoneId: { value: 'mic1' },
+      ]),
+      activeCameraId: ref('cam1'),
+      activeMicrophoneId: ref('mic1'),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
 
     const wrapper = mount(DeviceSelector)
     await wrapper.find('.device-toggle').trigger('click')
@@ -101,15 +102,15 @@ describe('DeviceSelector with devices', () => {
 
   it('calls switchCamera when camera selection changes', async () => {
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [
+      devices: ref([
         { deviceId: 'cam1', kind: 'videoinput', label: 'Camera 1' } as MediaDeviceInfo,
         { deviceId: 'cam2', kind: 'videoinput', label: 'Camera 2' } as MediaDeviceInfo,
-      ]},
-      activeCameraId: { value: 'cam1' },
-      activeMicrophoneId: { value: '' },
+      ]),
+      activeCameraId: ref('cam1'),
+      activeMicrophoneId: ref(''),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
 
     const wrapper = mount(DeviceSelector)
     await wrapper.find('.device-toggle').trigger('click')
@@ -122,15 +123,15 @@ describe('DeviceSelector with devices', () => {
 
   it('calls switchMicrophone when microphone selection changes', async () => {
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [
+      devices: ref([
         { deviceId: 'mic1', kind: 'audioinput', label: 'Mic 1' } as MediaDeviceInfo,
         { deviceId: 'mic2', kind: 'audioinput', label: 'Mic 2' } as MediaDeviceInfo,
-      ]},
-      activeCameraId: { value: '' },
-      activeMicrophoneId: { value: 'mic1' },
+      ]),
+      activeCameraId: ref(''),
+      activeMicrophoneId: ref('mic1'),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
 
     const wrapper = mount(DeviceSelector)
     await wrapper.find('.device-toggle').trigger('click')
@@ -143,14 +144,14 @@ describe('DeviceSelector with devices', () => {
 
   it('shows fallback label when device has no label', async () => {
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [
+      devices: ref([
         { deviceId: 'abc123def456', kind: 'videoinput', label: '' } as MediaDeviceInfo,
-      ]},
-      activeCameraId: { value: '' },
-      activeMicrophoneId: { value: '' },
+      ]),
+      activeCameraId: ref(''),
+      activeMicrophoneId: ref(''),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
 
     const wrapper = mount(DeviceSelector)
     await wrapper.find('.device-toggle').trigger('click')
@@ -161,15 +162,15 @@ describe('DeviceSelector with devices', () => {
 
   it('filters devices by kind correctly', async () => {
     vi.mocked(useMedia).mockReturnValue({
-      devices: { value: [
+      devices: ref([
         { deviceId: 'cam1', kind: 'videoinput', label: 'Camera' } as MediaDeviceInfo,
         { deviceId: 'mic1', kind: 'audioinput', label: 'Mic' } as MediaDeviceInfo,
-      ]},
-      activeCameraId: { value: '' },
-      activeMicrophoneId: { value: '' },
+      ]),
+      activeCameraId: ref(''),
+      activeMicrophoneId: ref(''),
       switchCamera: mockSwitchCamera,
       switchMicrophone: mockSwitchMicrophone,
-    } as any)
+    })
 
     const wrapper = mount(DeviceSelector)
     await wrapper.find('.device-toggle').trigger('click')
