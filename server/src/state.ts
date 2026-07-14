@@ -1,9 +1,31 @@
 import { ParticipantInfo } from './protocol.js'
+import { RedisRoomManager } from './rooms/redis.js'
 
 export interface Room {
   id: string
   participants: Map<string, ParticipantInfo>
   createdAt: number
+}
+
+let useRedis = false
+let redisManager: RedisRoomManager | null = null
+
+export function getRoomManager(): RoomManager | RedisRoomManager {
+  if (useRedis && redisManager) {
+    return redisManager
+  }
+  return new RoomManager()
+}
+
+export async function initRoomManager(): Promise<void> {
+  try {
+    redisManager = new RedisRoomManager()
+    useRedis = true
+    console.log('Using Redis for room persistence')
+  } catch (e) {
+    console.warn('Failed to initialize Redis, using in-memory:', e)
+    useRedis = false
+  }
 }
 
 export class RoomManager {
