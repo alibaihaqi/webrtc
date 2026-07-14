@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webrtc-coturn
+  namespace: webrtc
+  labels:
+    app: webrtc-coturn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webrtc-coturn
+  template:
+    metadata:
+      labels:
+        app: webrtc-coturn
+    spec:
+      containers:
+        - name: coturn
+          image: coturn/coturn
+          ports:
+            - containerPort: 3478
+              name: turn-udp
+              protocol: UDP
+            - containerPort: 3478
+              name: turn-tcp
+              protocol: TCP
+            - containerPort: 5349
+              name: turns-udp
+              protocol: UDP
+            - containerPort: 5349
+              name: turns-tcp
+              protocol: TCP
+          volumeMounts:
+            - name: coturn-config
+              mountPath: /etc/turnserver.conf
+              subPath: turnserver.conf
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "300m"
+      volumes:
+        - name: coturn-config
+          configMap:
+            name: webrtc-coturn-config

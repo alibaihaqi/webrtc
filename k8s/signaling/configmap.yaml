@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webrtc-config
+  namespace: webrtc
+data:
+  redis-url: "redis://webrtc-redis:6379"
+  coturn-host: "webrtc-coturn"
+  coturn-port: "3478"
+  cors-origin: "https://your-domain.com"
