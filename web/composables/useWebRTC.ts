@@ -31,6 +31,27 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
   let peerConnection: RTCPeerConnection | null = null
   const pendingCandidates: RTCIceCandidateInit[] = []
 
+  function replaceTrack(kind: 'audio' | 'video', newTrack: MediaStreamTrack): void {
+    if (!peerConnection) return
+
+    const sender = peerConnection.getSenders().find(s =>
+      s.track?.kind === kind
+    )
+
+    if (sender) {
+      sender.replaceTrack(newTrack)
+        .then(() => console.log(`${kind} track replaced successfully`))
+        .catch(e => console.error(`Failed to replace ${kind} track:`, e))
+    }
+  }
+
+  function setupTrackReplacement(): void {
+    window.addEventListener('track-replaced', ((event: CustomEvent) => {
+      const { kind, track } = event.detail
+      replaceTrack(kind, track)
+    }) as EventListener)
+  }
+
   function createPeerConnection() {
     peerConnection = new RTCPeerConnection(iceConfig)
 
@@ -67,6 +88,8 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
         iceRestartAttempts.value = 0
       }
     }
+
+    setupTrackReplacement()
 
     return peerConnection
   }
@@ -215,5 +238,6 @@ export function useWebRTC(iceConfig?: RTCConfiguration) {
     resetReconnectAttempts,
     iceRestartAttempts: readonly(iceRestartAttempts),
     iceRestart,
+    replaceTrack,
   }
 }

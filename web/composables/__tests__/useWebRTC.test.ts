@@ -22,6 +22,7 @@ describe('useWebRTC', () => {
       setRemoteDescription: vi.fn().mockResolvedValue(undefined),
       addIceCandidate: vi.fn().mockResolvedValue(undefined),
       addTrack: vi.fn(),
+      getSenders: vi.fn().mockReturnValue([]),
       close: vi.fn(),
       onicecandidate: null,
       ontrack: null,
@@ -167,6 +168,66 @@ describe('useWebRTC', () => {
 
       const result = await iceRestart()
       expect(result).toBe(false)
+    })
+  })
+
+  describe('track replacement', () => {
+    it('should replace track on sender by kind', async () => {
+      const mockSender = {
+        track: { kind: 'video' },
+        replaceTrack: vi.fn().mockResolvedValue(undefined),
+      }
+      mockPeerConnection.getSenders = vi.fn().mockReturnValue([mockSender])
+
+      const { createOffer, replaceTrack } = useWebRTC()
+      await createOffer()
+
+      const newTrack = { kind: 'video' } as MediaStreamTrack
+      await replaceTrack('video', newTrack)
+
+      expect(mockSender.replaceTrack).toHaveBeenCalledWith(newTrack)
+    })
+
+    it('should do nothing when no peer connection exists', async () => {
+      const { replaceTrack } = useWebRTC()
+
+      const newTrack = { kind: 'video' } as MediaStreamTrack
+      await replaceTrack('video', newTrack)
+
+      // No error thrown = success
+    })
+
+    it('should do nothing when no matching sender found', async () => {
+      mockPeerConnection.getSenders = vi.fn().mockReturnValue([])
+
+      const { createOffer, replaceTrack } = useWebRTC()
+      await createOffer()
+
+      const newTrack = { kind: 'video' } as MediaStreamTrack
+      await replaceTrack('video', newTrack)
+
+      // No error thrown = success
+    })
+
+    it('should listen for track-replaced events and call replaceTrack', async () => {
+      const mockSender = {
+        track: { kind: 'video' },
+        replaceTrack: vi.fn().mockResolvedValue(undefined),
+      }
+      mockPeerConnection.getSenders = vi.fn().mockReturnValue([mockSender])
+
+      const { createOffer } = useWebRTC()
+      await createOffer()
+
+      const newTrack = { kind: 'video' } as MediaStreamTrack
+      window.dispatchEvent(new CustomEvent('track-replaced', { detail: { kind: 'video', track: newTrack } }))
+
+      expect(mockSender.replaceTrack).toHaveBeenCalledWith(newTrack)
+    })
+
+    it('should expose replaceTrack in return value', () => {
+      const { replaceTrack } = useWebRTC()
+      expect(typeof replaceTrack).toBe('function')
     })
   })
 })
