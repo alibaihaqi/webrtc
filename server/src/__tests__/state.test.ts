@@ -13,84 +13,84 @@ describe('RoomManager', () => {
     vi.useRealTimers()
   })
 
-  it('creates a room', () => {
-    const room = manager.createRoom('room-1')
+  it('creates a room', async () => {
+    const room = await manager.createRoom('room-1')
     expect(room.id).toBe('room-1')
     expect(room.participants.size).toBe(0)
-    expect(manager.size).toBe(1)
+    expect(await manager.size()).toBe(1)
   })
 
-  it('joins a room', () => {
-    manager.createRoom('room-1')
-    const result = manager.joinRoom('room-1', {
+  it('joins a room', async () => {
+    await manager.createRoom('room-1')
+    const result = await manager.joinRoom('room-1', {
       userId: 'user-1',
       displayName: 'Alice',
       joinedAt: Date.now(),
     })
     expect(result.success).toBe(true)
-    expect(manager.getParticipants('room-1')).toHaveLength(1)
+    expect(await manager.getParticipants('room-1')).toHaveLength(1)
   })
 
-  it('enforces max 2 participants', () => {
-    manager.createRoom('room-1')
-    manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
-    manager.joinRoom('room-1', { userId: 'user-2', displayName: 'Bob', joinedAt: Date.now() })
+  it('enforces max 2 participants', async () => {
+    await manager.createRoom('room-1')
+    await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+    await manager.joinRoom('room-1', { userId: 'user-2', displayName: 'Bob', joinedAt: Date.now() })
 
-    const result = manager.joinRoom('room-1', { userId: 'user-3', displayName: 'Charlie', joinedAt: Date.now() })
+    const result = await manager.joinRoom('room-1', { userId: 'user-3', displayName: 'Charlie', joinedAt: Date.now() })
     expect(result.success).toBe(false)
     expect(result.error).toBe('Room is full')
   })
 
-  it('leaves a room', () => {
-    manager.createRoom('room-1')
-    manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+  it('leaves a room', async () => {
+    await manager.createRoom('room-1')
+    await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
 
-    const left = manager.leaveRoom('room-1', 'user-1')
+    const left = await manager.leaveRoom('room-1', 'user-1')
     expect(left).toBe(true)
-    expect(manager.getParticipants('room-1')).toHaveLength(0)
+    expect(await manager.getParticipants('room-1')).toHaveLength(0)
   })
 
-  it('schedules room cleanup after 30s when empty', () => {
-    manager.createRoom('room-1')
-    manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
-    manager.leaveRoom('room-1', 'user-1')
+  it('schedules room cleanup after 30s when empty', async () => {
+    await manager.createRoom('room-1')
+    await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+    await manager.leaveRoom('room-1', 'user-1')
 
-    expect(manager.getRoom('room-1')).toBeDefined()
+    expect(await manager.getRoom('room-1')).not.toBeNull()
 
     vi.advanceTimersByTime(30_000)
 
-    expect(manager.getRoom('room-1')).toBeUndefined()
+    expect(await manager.getRoom('room-1')).toBeNull()
   })
 
-  it('cancels cleanup when someone joins', () => {
-    manager.createRoom('room-1')
-    manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
-    manager.leaveRoom('room-1', 'user-1')
+  it('cancels cleanup when someone joins', async () => {
+    await manager.createRoom('room-1')
+    await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+    await manager.leaveRoom('room-1', 'user-1')
 
     vi.advanceTimersByTime(20_000)
 
-    manager.joinRoom('room-1', { userId: 'user-2', displayName: 'Bob', joinedAt: Date.now() })
+    await manager.joinRoom('room-1', { userId: 'user-2', displayName: 'Bob', joinedAt: Date.now() })
 
     vi.advanceTimersByTime(15_000)
 
-    expect(manager.getRoom('room-1')).toBeDefined()
+    expect(await manager.getRoom('room-1')).not.toBeNull()
   })
 
-  it('checks if user is in room', () => {
-    manager.createRoom('room-1')
-    manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+  it('checks if user is in room', async () => {
+    await manager.createRoom('room-1')
+    await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
 
-    expect(manager.isInRoom('room-1', 'user-1')).toBe(true)
-    expect(manager.isInRoom('room-1', 'user-2')).toBe(false)
+    expect(await manager.isInRoom('room-1', 'user-1')).toBe(true)
+    expect(await manager.isInRoom('room-1', 'user-2')).toBe(false)
   })
 
-  it('returns false when leaving non-existent room', () => {
-    const left = manager.leaveRoom('room-1', 'user-1')
+  it('returns false when leaving non-existent room', async () => {
+    const left = await manager.leaveRoom('room-1', 'user-1')
     expect(left).toBe(false)
   })
 
-  it('returns error when joining non-existent room', () => {
-    const result = manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
+  it('returns error when joining non-existent room', async () => {
+    const result = await manager.joinRoom('room-1', { userId: 'user-1', displayName: 'Alice', joinedAt: Date.now() })
     expect(result.success).toBe(false)
     expect(result.error).toBe('Room not found')
   })

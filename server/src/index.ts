@@ -3,6 +3,7 @@ import { WebSocketServer } from 'ws'
 import { SignalingServer } from './signaling.js'
 import { generateTurnCredentials, getTurnConfig } from './turn/credentials.js'
 import { initAPM, captureMetric } from './monitoring/apm.js'
+import { initRoomManager } from './state.js'
 
 initAPM()
 
@@ -40,6 +41,9 @@ const server = createServer((req, res) => {
 })
 
 const wss = new WebSocketServer({ server })
+
+await initRoomManager()
+
 const signaling = new SignalingServer(wss)
 
 server.listen(PORT, () => {

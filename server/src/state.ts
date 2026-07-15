@@ -7,10 +7,21 @@ export interface Room {
   createdAt: number
 }
 
+export interface IRoomManager {
+  createRoom(roomId: string): Promise<Room>
+  getRoom(roomId: string): Promise<Room | null>
+  joinRoom(roomId: string, participant: ParticipantInfo): Promise<{ success: boolean; error?: string }>
+  leaveRoom(roomId: string, userId: string): Promise<boolean>
+  getParticipants(roomId: string): Promise<ParticipantInfo[]>
+  isInRoom(roomId: string, userId: string): Promise<boolean>
+  destroyRoom(roomId: string): Promise<boolean>
+  size(): Promise<number>
+}
+
 let useRedis = false
 let redisManager: RedisRoomManager | null = null
 
-export function getRoomManager(): RoomManager | RedisRoomManager {
+export function getRoomManager(): IRoomManager {
   if (useRedis && redisManager) {
     return redisManager
   }
@@ -28,11 +39,11 @@ export async function initRoomManager(): Promise<void> {
   }
 }
 
-export class RoomManager {
+export class RoomManager implements IRoomManager {
   private rooms: Map<string, Room> = new Map()
   private cleanupTimers: Map<string, NodeJS.Timeout> = new Map()
 
-  createRoom(roomId: string): Room {
+  async createRoom(roomId: string): Promise<Room> {
     const room: Room = {
       id: roomId,
       participants: new Map(),
@@ -42,12 +53,12 @@ export class RoomManager {
     return room
   }
 
-  getRoom(roomId: string): Room | undefined {
-    return this.rooms.get(roomId)
+  async getRoom(roomId: string): Promise<Room | null> {
+    return this.rooms.get(roomId) ?? null
   }
 
-  joinRoom(roomId: string, participant: ParticipantInfo): { success: boolean; error?: string } {
-    const room = this.getRoom(roomId)
+  async joinRoom(roomId: string, participant: ParticipantInfo): Promise<{ success: boolean; error?: string }> {
+    const room = await this.getRoom(roomId)
     if (!room) {
       return { success: false, error: 'Room not found' }
     }
@@ -61,8 +72,8 @@ export class RoomManager {
     return { success: true }
   }
 
-  leaveRoom(roomId: string, userId: string): boolean {
-    const room = this.getRoom(roomId)
+  async leaveRoom(roomId: string, userId: string): Promise<boolean> {
+    const room = await this.getRoom(roomId)
     if (!room) return false
 
     const deleted = room.participants.delete(userId)
@@ -72,26 +83,27 @@ export class RoomManager {
     return deleted
   }
 
-  getParticipants(roomId: string): ParticipantInfo[] {
-    const room = this.getRoom(roomId)
+  async getParticipants(roomId: string): Promise<ParticipantInfo[]> {
+    const room = await this.getRoom(roomId)
     return room ? Array.from(room.participants.values()) : []
   }
 
-  isInRoom(roomId: string, userId: string): boolean {
-    const room = this.getRoom(roomId)
+  async isInRoom(roomId: string, userId: string): Promise<boolean> {
+    const room = await this.getRoom(roomId)
     return room?.participants.has(userId) ?? false
   }
 
-  destroyRoom(roomId: string): boolean {
+  async destroyRoom(roomId: string): Promise<boolean> {
     this.cancelCleanup(roomId)
     return this.rooms.delete(roomId)
   }
 
   private scheduleCleanup(roomId: string): void {
     const timer = setTimeout(() => {
-      const room = this.getRoom(roomId)
+      const room = this.rooms.get(roomId)
       if (room && room.participants.size === 0) {
-        this.destroyRoom(roomId)
+        this.cancelCleanup(roomId)
+        this.rooms.delete(roomId)
       }
     }, 30_000)
     this.cleanupTimers.set(roomId, timer)
@@ -105,7 +117,7 @@ export class RoomManager {
     }
   }
 
-  get size(): number {
+  async size(): Promise<number> {
     return this.rooms.size
   }
 }

@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from 'ws'
 import { IncomingMessage } from 'http'
-import { RoomManager } from './state.js'
+import { getRoomManager } from './state.js'
+import type { IRoomManager } from './state.js'
 import { captureMetric, captureError } from './monitoring/apm.js'
 import type {
   ClientMessage,
@@ -13,12 +14,12 @@ const HEARTBEAT_TIMEOUT = 10_000
 
 export class SignalingServer {
   private wss: WebSocketServer
-  private roomManager: RoomManager
+  private roomManager: IRoomManager
   private clients: Map<WebSocket, { userId: string; roomId: string }> = new Map()
 
   constructor(wss: WebSocketServer) {
     this.wss = wss
-    this.roomManager = new RoomManager()
+    this.roomManager = getRoomManager()
     this.setupConnectionHandler()
   }
 
@@ -52,7 +53,10 @@ export class SignalingServer {
       ws.on('message', (data: Buffer) => {
         try {
           const message: ClientMessage = JSON.parse(data.toString())
-          this.handleMessage(ws, message)
+          this.handleMessage(ws, message).catch((err) => {
+            captureError(err)
+            this.sendError(ws, 'Internal server error')
+          })
         } catch {
           this.sendError(ws, 'Invalid message format')
         }
@@ -70,13 +74,13 @@ export class SignalingServer {
     })
   }
 
-  private handleMessage(ws: WebSocket, message: ClientMessage): void {
+  private async handleMessage(ws: WebSocket, message: ClientMessage): Promise<void> {
     switch (message.type) {
       case 'join-room':
-        this.handleJoinRoom(ws, message)
+        await this.handleJoinRoom(ws, message)
         break
       case 'leave-room':
-        this.handleLeaveRoom(ws)
+        await this.handleLeaveRoom(ws)
         break
       case 'offer':
       case 'answer':
@@ -91,16 +95,16 @@ export class SignalingServer {
     }
   }
 
-  private handleJoinRoom(
+  private async handleJoinRoom(
     ws: WebSocket,
     message: { type: 'join-room'; roomId: string; from: string; displayName: string; timestamp: number },
-  ): void {
+  ): Promise<void> {
     const { roomId, from, displayName } = message
 
-    this.handleDisconnect(ws)
+    await this.handleDisconnect(ws)
 
-    if (!this.roomManager.getRoom(roomId)) {
-      this.roomManager.createRoom(roomId)
+    if (!(await this.roomManager.getRoom(roomId))) {
+      await this.roomManager.createRoom(roomId)
     }
 
     const participant: ParticipantInfo = {
@@ -109,7 +113,7 @@ export class SignalingServer {
       joinedAt: Date.now(),
     }
 
-    const result = this.roomManager.joinRoom(roomId, participant)
+    const result = await this.roomManager.joinRoom(roomId, participant)
     if (!result.success) {
       this.send(ws, {
         type: 'room-full',
@@ -125,7 +129,7 @@ export class SignalingServer {
 
     captureMetric('room.joined', 1, { roomId })
 
-    const participants = this.roomManager.getParticipants(roomId)
+    const participants = await this.roomManager.getParticipants(roomId)
     this.send(ws, {
       type: 'room-joined',
       roomId,
@@ -147,12 +151,12 @@ export class SignalingServer {
     )
   }
 
-  private handleLeaveRoom(ws: WebSocket): void {
+  private async handleLeaveRoom(ws: WebSocket): Promise<void> {
     const clientInfo = this.clients.get(ws)
     if (!clientInfo) return
 
     const { roomId, userId } = clientInfo
-    this.roomManager.leaveRoom(roomId, userId)
+    await this.roomManager.leaveRoom(roomId, userId)
     this.clients.delete(ws)
 
     captureMetric('room.left', 1, { roomId })
@@ -180,12 +184,12 @@ export class SignalingServer {
     this.broadcast(clientInfo.roomId, message as ServerMessage, ws)
   }
 
-  private handleDisconnect(ws: WebSocket): void {
+  private async handleDisconnect(ws: WebSocket): Promise<void> {
     const clientInfo = this.clients.get(ws)
     if (!clientInfo) return
 
     const { roomId, userId } = clientInfo
-    this.roomManager.leaveRoom(roomId, userId)
+    await this.roomManager.leaveRoom(roomId, userId)
     this.clients.delete(ws)
 
     captureMetric('websocket.disconnected', 1, { roomId })
@@ -223,7 +227,7 @@ export class SignalingServer {
     })
   }
 
-  getRoomManager(): RoomManager {
+  getRoomManager(): IRoomManager {
     return this.roomManager
   }
 
