@@ -174,14 +174,14 @@ export class SignalingServer {
     const clientInfo = this.clients.get(ws)
     if (!clientInfo) return
 
-    this.broadcast(clientInfo.roomId, message as ServerMessage, ws)
+    this.broadcast(clientInfo.roomId, message as unknown as ServerMessage, ws)
   }
 
   private handleDataChannelMessage(ws: WebSocket, message: ClientMessage): void {
     const clientInfo = this.clients.get(ws)
     if (!clientInfo) return
 
-    this.broadcast(clientInfo.roomId, message as ServerMessage, ws)
+    this.broadcast(clientInfo.roomId, message as unknown as ServerMessage, ws)
   }
 
   private async handleDisconnect(ws: WebSocket): Promise<void> {
