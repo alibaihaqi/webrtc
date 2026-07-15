@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-15 — CI fix: TypeScript build + health test
+
+- Synced `pnpm-lock.yaml` with `elastic-apm-node` addition (frozen-lockfile mismatch)
+- Fixed TS2305: health test imported non-existent `app` from `index.ts`
+- Fixed TS2352: `ClientMessage` → `ServerMessage` cast via `as unknown as ServerMessage`
+- Rewrote health test to use actual server instance (was hitting non-existent live server in CI)
+
 ## 2026-07-15 — v0.2 Reliability shipped
 
 - **Connection Resilience:** Heartbeat ping/pong (30s), reconnection with exponential backoff (1s→16s, max 5 attempts), ICE restart with auto-recovery (max 3 attempts)
