@@ -1,24 +1,35 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install pnpm
 RUN corepack enable && corepack prepare pnpm@8.9.2 --activate
 
-# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source
 COPY . .
 
-# Build
 RUN pnpm build
 
-# Expose port
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup && \
+    chown -R appuser:appgroup /app
+USER appuser
+
+ENV NODE_ENV=production
+
 EXPOSE 3001
 
-# Start
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+
 CMD ["node", "dist/index.js"]
