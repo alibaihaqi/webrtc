@@ -10,7 +10,7 @@ const mockRedis = {
   scard: vi.fn().mockResolvedValue(0),
   sismember: vi.fn().mockResolvedValue(0),
   del: vi.fn().mockResolvedValue(1),
-  keys: vi.fn().mockResolvedValue([]),
+  scan: vi.fn().mockResolvedValue(['0', []]),
 }
 
 vi.mock('../redis.js', () => ({
@@ -35,7 +35,7 @@ describe('RedisRoomManager', () => {
     mockRedis.scard.mockResolvedValue(0)
     mockRedis.sismember.mockResolvedValue(0)
     mockRedis.del.mockResolvedValue(1)
-    mockRedis.keys.mockResolvedValue([])
+    mockRedis.scan.mockResolvedValue(['0', []])
     vi.mocked(getRedisClient).mockReturnValue(mockRedis as any)
     manager = new RedisRoomManager()
   })
@@ -338,22 +338,35 @@ describe('RedisRoomManager', () => {
 
   describe('size', () => {
     it('returns number of rooms', async () => {
-      mockRedis.keys.mockResolvedValueOnce(['room:room-1', 'room:room-2'])
+      mockRedis.scan.mockResolvedValueOnce(['0', ['room:room-1', 'room:room-2']])
 
       const size = await manager.size()
       expect(size).toBe(2)
     })
 
     it('excludes participant-related keys', async () => {
-      mockRedis.keys.mockResolvedValueOnce([
-        'room:room-1',
-        'room:room-1:participants',
-        'room:room-1:participant:user-1',
-        'room:room-2',
+      mockRedis.scan.mockResolvedValueOnce([
+        '0',
+        [
+          'room:room-1',
+          'room:room-1:participants',
+          'room:room-1:participant:user-1',
+          'room:room-2',
+        ],
       ])
 
       const size = await manager.size()
       expect(size).toBe(2)
+    })
+
+    it('handles multiple SCAN iterations', async () => {
+      mockRedis.scan
+        .mockResolvedValueOnce(['42', ['room:room-1']])
+        .mockResolvedValueOnce(['0', ['room:room-2']])
+
+      const size = await manager.size()
+      expect(size).toBe(2)
+      expect(mockRedis.scan).toHaveBeenCalledTimes(2)
     })
 
     it('returns 0 when Redis is not available', async () => {

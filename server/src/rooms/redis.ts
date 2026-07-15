@@ -1,11 +1,11 @@
 import { getRedisClient } from '../redis.js'
 import type { ParticipantInfo } from '../protocol.js'
-import type { Room } from '../state.js'
+import type { Room, IRoomManager } from '../state.js'
 
 const ROOM_TTL = 60 * 60 // 1 hour (rooms expire after 1 hour of inactivity)
 const CLEANUP_DELAY = 30 // 30 seconds after last participant leaves
 
-export class RedisRoomManager {
+export class RedisRoomManager implements IRoomManager {
   private cleanupTimers: Map<string, NodeJS.Timeout> = new Map()
 
   constructor() {
@@ -148,8 +148,18 @@ export class RedisRoomManager {
     const redis = this.getRedis()
     if (!redis) return 0
 
-    const keys = await redis.keys('room:*')
-    return keys.filter(k => !k.includes(':participants') && !k.includes(':participant:')).length
+    let cursor = '0'
+    const allKeys: string[] = []
+
+    do {
+      const [nextCursor, keys] = await redis.scan(
+        cursor, 'MATCH', 'room:*', 'COUNT', 100
+      )
+      cursor = nextCursor
+      allKeys.push(...keys)
+    } while (cursor !== '0')
+
+    return allKeys.filter(k => !k.includes(':participants') && !k.includes(':participant:')).length
   }
 
   private scheduleCleanup(roomId: string): void {

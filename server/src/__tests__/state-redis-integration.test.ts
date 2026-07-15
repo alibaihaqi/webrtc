@@ -10,7 +10,7 @@ const mockRedis = {
   scard: vi.fn().mockResolvedValue(0),
   sismember: vi.fn().mockResolvedValue(0),
   del: vi.fn().mockResolvedValue(1),
-  keys: vi.fn().mockResolvedValue([]),
+  scan: vi.fn().mockResolvedValue(['0', []]),
 }
 
 vi.mock('../redis.js', () => ({
@@ -59,7 +59,7 @@ describe('RedisRoomManager integration', () => {
     mockRedis.scard.mockResolvedValue(0)
     mockRedis.sismember.mockResolvedValue(0)
     mockRedis.del.mockResolvedValue(1)
-    mockRedis.keys.mockResolvedValue([])
+    mockRedis.scan.mockResolvedValue(['0', []])
 
     vi.mocked(getRedisClient).mockReturnValue(mockRedis as any)
     await initRoomManager()
