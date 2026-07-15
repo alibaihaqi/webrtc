@@ -57,8 +57,9 @@ export function useSignaling(signalConnectionState?: Ref<ConnectionState>) {
 
       if (reconnectAttempts.value < RECONNECT_MAX_ATTEMPTS && !userInitiatedClose) {
         reconnecting.value = true
+        const baseDelay = RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts.value)
         const delay = Math.min(
-          RECONNECT_BASE_DELAY * Math.pow(2, reconnectAttempts.value),
+          baseDelay * (0.8 + Math.random() * 0.4),
           RECONNECT_MAX_DELAY
         )
         console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.value + 1}/${RECONNECT_MAX_ATTEMPTS})`)

@@ -35,6 +35,7 @@ describe('useSignaling', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
     MockWebSocket.instances = []
     vi.stubGlobal('WebSocket', MockWebSocket as unknown as typeof WebSocket)
     vi.stubGlobal('useRuntimeConfig', () => ({
@@ -192,6 +193,38 @@ describe('useSignaling', () => {
       const newWs = MockWebSocket.instances[MockWebSocket.instances.length - 1]
       newWs.simulateOpen()
       expect(reconnectFailed.value).toBe(false)
+    })
+
+    it('applies jitter to shorten backoff delay (0.8x)', async () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0)
+      const { connect } = useSignaling()
+      connect('room1', 'user1', 'Alice')
+
+      const ws = MockWebSocket.instances[0]
+      ws.simulateOpen()
+      ws.simulateClose()
+
+      await vi.advanceTimersByTimeAsync(799)
+      expect(MockWebSocket.instances.length).toBe(1)
+
+      await vi.advanceTimersByTimeAsync(1)
+      expect(MockWebSocket.instances.length).toBe(2)
+    })
+
+    it('applies jitter to lengthen backoff delay (1.1x)', async () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.75)
+      const { connect } = useSignaling()
+      connect('room1', 'user1', 'Alice')
+
+      const ws = MockWebSocket.instances[0]
+      ws.simulateOpen()
+      ws.simulateClose()
+
+      await vi.advanceTimersByTimeAsync(1099)
+      expect(MockWebSocket.instances.length).toBe(1)
+
+      await vi.advanceTimersByTimeAsync(1)
+      expect(MockWebSocket.instances.length).toBe(2)
     })
   })
 })
