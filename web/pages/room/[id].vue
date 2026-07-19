@@ -32,17 +32,30 @@
       @toggle-mute="toggleMute"
       @toggle-video="toggleVideo"
       @hangup="handleHangup"
-    />
+    >
+      <template #right-controls>
+        <button
+          @click="toggleChat"
+          :class="['w-10 h-10 rounded-full flex items-center justify-center transition-colors', isChatOpen ? 'bg-frost-blue text-white' : 'bg-white/10 text-frost-white hover:bg-white/20']"
+          title="Chat"
+        >
+          <MessageSquare class="w-5 h-5" />
+        </button>
+      </template>
+    </RoomFooter>
 
     <BaseToast :show="showToast" message="Link copied to clipboard!" />
+    <ChatSidebar />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { MessageSquare } from 'lucide-vue-next'
 import { useWebRTC } from '~/composables/useWebRTC'
 import { useSignaling } from '~/composables/useSignaling'
 import { useAuth } from '~/composables/useAuth'
+import { useChat } from '~/composables/useChat'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,6 +71,8 @@ const {
 const {
   isConnected, error: signalingError, connect, send, disconnect,
 } = useSignaling()
+
+const { isOpen: isChatOpen, toggle: toggleChat } = useChat()
 
 const participantCount = ref(1)
 const remoteName = ref('Remote')
