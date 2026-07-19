@@ -37,6 +37,13 @@ export interface DataChannelMessage extends BaseMessage {
   data: unknown
 }
 
+export interface ChatMessage extends BaseMessage {
+  type: 'chat-message'
+  senderName: string
+  text: string
+  chatId: string
+}
+
 // Server -> Client messages
 export interface RoomJoinedMessage extends BaseMessage {
   type: 'room-joined'
@@ -78,6 +85,7 @@ export type ClientMessage =
   | AnswerMessage
   | IceCandidateMessage
   | DataChannelMessage
+  | ChatMessage
 
 export type ServerMessage =
   | RoomJoinedMessage
