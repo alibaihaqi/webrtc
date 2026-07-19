@@ -36,6 +36,7 @@ const statusClasses = computed(() => {
     case 'connected': return 'bg-frost-teal/20 text-frost-teal'
     case 'connecting': return 'bg-frost-blue/20 text-frost-blue'
     case 'reconnecting': return 'bg-frost-red/20 text-frost-red'
+    case 'error': return 'bg-frost-red/20 text-frost-red'
     default: return 'bg-white/10 text-frost-teal/50'
   }
 })
@@ -45,6 +46,7 @@ const dotColor = computed(() => {
     case 'connected': return 'bg-frost-teal'
     case 'connecting': return 'bg-frost-blue'
     case 'reconnecting': return 'bg-frost-red'
+    case 'error': return 'bg-frost-red'
     default: return 'bg-frost-teal/30'
   }
 })

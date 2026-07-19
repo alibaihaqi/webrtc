@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useWebRTC } from '~/composables/useWebRTC'
 import { useSignaling } from '~/composables/useSignaling'
 import { useAuth } from '~/composables/useAuth'
@@ -63,6 +63,11 @@ const participantCount = ref(1)
 const remoteName = ref('Remote')
 const reconnectAttempt = ref(0)
 const showToast = ref(false)
+
+watch(connectionState, (state) => {
+  if (state === 'reconnecting') reconnectAttempt.value++
+  else if (state === 'connected') reconnectAttempt.value = 0
+})
 
 const connectionStatus = computed(() => {
   if (webrtcError.value || signalingError.value) return 'error'
