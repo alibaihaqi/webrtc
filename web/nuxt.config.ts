@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   typescript: { strict: true },
 
+  modules: ['@nuxtjs/tailwindcss'],
+
+  css: ['~/assets/css/main.css'],
+
   nitro: {
     preset: 'vercel',
   },
