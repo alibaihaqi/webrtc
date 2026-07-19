@@ -85,6 +85,7 @@ export class SignalingServer {
       case 'offer':
       case 'answer':
       case 'ice-candidate':
+      case 'chat-message':
         this.handleRelayMessage(ws, message)
         break
       case 'data-channel-message':

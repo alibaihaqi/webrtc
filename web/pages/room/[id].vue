@@ -45,7 +45,7 @@
     </RoomFooter>
 
     <BaseToast :show="showToast" message="Link copied to clipboard!" />
-    <ChatSidebar />
+    <ChatSidebar :send-signal="send" :room-id="roomId" />
   </div>
 </template>
 

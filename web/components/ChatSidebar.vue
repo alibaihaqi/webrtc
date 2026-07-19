@@ -59,6 +59,12 @@ import { ref, watch, nextTick } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useChat } from '~/composables/useChat'
 import { useAuth } from '~/composables/useAuth'
+import type { SignalMessage } from '~/composables/useSignaling'
+
+const props = defineProps<{
+  sendSignal: (msg: Omit<SignalMessage, 'timestamp'>) => void
+  roomId: string
+}>()
 
 const { messages, isOpen, toggle, sendMessage } = useChat()
 const { user } = useAuth()
@@ -72,6 +78,8 @@ function handleSend() {
     newMessage.value,
     user.value?.uid || 'anonymous',
     user.value?.displayName || 'User',
+    props.sendSignal,
+    props.roomId,
   )
   newMessage.value = ''
 }
