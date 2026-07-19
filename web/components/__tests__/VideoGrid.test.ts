@@ -2,24 +2,25 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import VideoGrid from '../VideoGrid.vue'
 
+const VideoTileStub = {
+  template: '<div class="video-tile"><slot /><span class="tile-name">{{ name }}</span></div>',
+  props: ['stream', 'name', 'muted', 'placeholder'],
+}
+
 describe('VideoGrid', () => {
-  it('renders local and remote video elements', () => {
+  it('renders local VideoTile always', () => {
     const wrapper = mount(VideoGrid, {
-      props: {
-        localStream: null,
-        remoteStream: null,
-      },
+      props: { localStream: null, remoteStream: null },
+      global: { stubs: { VideoTile: VideoTileStub } },
     })
 
-    expect(wrapper.findAll('video')).toHaveLength(2)
+    expect(wrapper.findAll('.video-tile')).toHaveLength(1)
   })
 
   it('shows waiting message when no remote stream', () => {
     const wrapper = mount(VideoGrid, {
-      props: {
-        localStream: null,
-        remoteStream: null,
-      },
+      props: { localStream: null, remoteStream: null },
+      global: { stubs: { VideoTile: VideoTileStub } },
     })
 
     expect(wrapper.text()).toContain('Waiting for remote participant')
@@ -27,23 +28,31 @@ describe('VideoGrid', () => {
 
   it('displays "You" label for local video', () => {
     const wrapper = mount(VideoGrid, {
-      props: {
-        localStream: null,
-        remoteStream: null,
-      },
+      props: { localStream: null, remoteStream: null },
+      global: { stubs: { VideoTile: VideoTileStub } },
     })
 
     expect(wrapper.text()).toContain('You')
   })
 
-  it('displays "Remote" label for remote video', () => {
+  it('renders two VideoTiles when remote stream is present', () => {
+    const fakeStream = new MediaStream()
     const wrapper = mount(VideoGrid, {
-      props: {
-        localStream: null,
-        remoteStream: null,
-      },
+      props: { localStream: fakeStream, remoteStream: fakeStream, remoteName: 'Alice' },
+      global: { stubs: { VideoTile: VideoTileStub } },
     })
 
-    expect(wrapper.text()).toContain('Remote')
+    expect(wrapper.findAll('.video-tile')).toHaveLength(2)
+    expect(wrapper.text()).toContain('Alice')
+  })
+
+  it('displays remote name when stream is present', () => {
+    const fakeStream = new MediaStream()
+    const wrapper = mount(VideoGrid, {
+      props: { localStream: fakeStream, remoteStream: fakeStream, remoteName: 'Bob' },
+      global: { stubs: { VideoTile: VideoTileStub } },
+    })
+
+    expect(wrapper.text()).toContain('Bob')
   })
 })
