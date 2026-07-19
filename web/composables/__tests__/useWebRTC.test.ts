@@ -32,7 +32,7 @@ describe('useWebRTC', () => {
       iceConnectionState: 'new',
       remoteDescription: null,
     }
-    vi.stubGlobal('RTCPeerConnection', vi.fn(() => mockPeerConnection))
+    vi.stubGlobal('RTCPeerConnection', vi.fn().mockImplementation(function() { return mockPeerConnection }))
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       json: () => Promise.resolve({
         username: '12345:user',

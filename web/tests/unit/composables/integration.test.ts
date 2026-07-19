@@ -22,7 +22,7 @@ describe('Composable integration', () => {
       close: vi.fn(),
       addTrack: vi.fn(),
     }
-    vi.stubGlobal('RTCPeerConnection', vi.fn(() => mockPeerConnection))
+    vi.stubGlobal('RTCPeerConnection', vi.fn().mockImplementation(function() { return mockPeerConnection }))
 
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     expect(stream).toBeDefined()
