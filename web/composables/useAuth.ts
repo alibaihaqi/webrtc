@@ -5,9 +5,12 @@ const user = ref<User | null>(null)
 const loading = ref(true)
 
 export function useAuth() {
-  const auth = getAuth()
+  function getFirebaseAuth() {
+    return getAuth()
+  }
 
   onMounted(() => {
+    const auth = getFirebaseAuth()
     onAuthStateChanged(auth, (u) => {
       user.value = u
       loading.value = false
@@ -17,7 +20,7 @@ export function useAuth() {
   async function signInWithGoogle() {
     const provider = new GoogleAuthProvider()
     try {
-      await signInWithPopup(auth, provider)
+      await signInWithPopup(getFirebaseAuth(), provider)
     } catch (error) {
       console.error('Sign in failed:', error)
       throw error
@@ -25,7 +28,7 @@ export function useAuth() {
   }
 
   function signOut() {
-    return auth.signOut()
+    return getFirebaseAuth().signOut()
   }
 
   return { user, loading, signInWithGoogle, signOut }
