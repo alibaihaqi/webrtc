@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-20 — frost design system
+
+- Frost color palette standardized across projects (PR #16)
+- Tailwind v3 → v4 migration (`@nuxtjs/tailwindcss` → `@tailwindcss/vite`)
+- `tailwind.config.ts` deleted (replaced by `@theme` in `tokens.css`)
+- Fixed "Unknown route middleware: 'auth'" — removed redundant `definePageMeta` reference (PR #17)
+
 ## 2026-07-15 — v0.2 Reliability shipped
 
 - **Connection Resilience:** Heartbeat ping/pong (30s), reconnection with exponential backoff (1s→16s, max 5 attempts), ICE restart with auto-recovery (max 3 attempts)
