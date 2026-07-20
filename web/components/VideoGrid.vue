@@ -12,10 +12,10 @@
       :name="remoteName"
       placeholder="Waiting for remote participant..."
     />
-    <div v-else class="relative bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center">
+    <div v-else class="relative bg-surface rounded-lg overflow-hidden flex items-center justify-center">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-frost-teal mx-auto mb-4"></div>
-        <p class="text-frost-teal text-sm">Waiting for remote participant...</p>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fg-secondary mx-auto mb-4"></div>
+        <p class="text-fg-secondary text-sm">Waiting for remote participant...</p>
       </div>
     </div>
   </div>

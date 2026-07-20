@@ -13,7 +13,7 @@ describe('ConnectionQuality', () => {
     })
 
     expect(wrapper.text()).toContain('Good connection')
-    expect(wrapper.find('.bg-green-500').exists()).toBe(true)
+    expect(wrapper.find('.bg-success').exists()).toBe(true)
   })
 
   it('shows fair indicator for fair quality', () => {
@@ -26,7 +26,7 @@ describe('ConnectionQuality', () => {
     })
 
     expect(wrapper.text()).toContain('Fair connection')
-    expect(wrapper.find('.bg-yellow-500').exists()).toBe(true)
+    expect(wrapper.find('.bg-warning').exists()).toBe(true)
   })
 
   it('shows poor indicator for poor quality', () => {
@@ -39,6 +39,6 @@ describe('ConnectionQuality', () => {
     })
 
     expect(wrapper.text()).toContain('Poor connection')
-    expect(wrapper.find('.bg-red-500').exists()).toBe(true)
+    expect(wrapper.find('.bg-danger').exists()).toBe(true)
   })
 })

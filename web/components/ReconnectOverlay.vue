@@ -3,11 +3,11 @@
     <div class="text-center">
       <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
       <h2 class="text-xl font-semibold text-white mb-2">Reconnecting...</h2>
-      <p class="text-gray-400">Attempt {{ attempt }} of {{ maxAttempts }}</p>
+      <p class="text-fg-tertiary">Attempt {{ attempt }} of {{ maxAttempts }}</p>
       <button
         v-if="attempt >= maxAttempts"
         @click="$emit('giveUp')"
-        class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+        class="mt-4 px-4 py-2 bg-danger hover:bg-danger/80 text-white rounded-lg transition-colors"
       >
         End Call
       </button>

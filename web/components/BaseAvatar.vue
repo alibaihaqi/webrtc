@@ -1,7 +1,7 @@
 <template>
-  <div class="relative inline-flex items-center justify-center rounded-full bg-frost-blue/20 text-frost-teal font-medium select-none" :class="sizeClasses">
+  <div class="relative inline-flex items-center justify-center rounded-full bg-accent/20 text-fg-secondary font-medium select-none" :class="sizeClasses">
     <span>{{ initials }}</span>
-    <div v-if="online" class="absolute bottom-0 right-0 w-3 h-3 bg-frost-teal rounded-full border-2 border-slate-900"></div>
+    <div v-if="online" class="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-canvas"></div>
   </div>
 </template>
 

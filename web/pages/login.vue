@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-slate-900 flex items-center justify-center">
+  <div class="min-h-screen bg-canvas flex items-center justify-center">
     <div class="max-w-md w-full space-y-8 px-6">
       <div class="text-center">
-        <h1 class="text-3xl font-bold text-frost-white">WebRTC</h1>
-        <p class="mt-2 text-frost-teal">Sign in to start a call</p>
+        <h1 class="text-3xl font-bold text-fg-primary">WebRTC</h1>
+        <p class="mt-2 text-fg-secondary">Sign in to start a call</p>
       </div>
       <BaseButton
         @click="handleSignIn"

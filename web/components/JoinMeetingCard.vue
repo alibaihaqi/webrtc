@@ -1,10 +1,10 @@
 <template>
   <BaseCard class="flex flex-col items-center text-center">
-    <div class="w-12 h-12 rounded-full bg-frost-teal/20 flex items-center justify-center mb-4">
-      <LogIn class="w-6 h-6 text-frost-teal" />
+    <div class="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center mb-4">
+      <LogIn class="w-6 h-6 text-success" />
     </div>
-    <h2 class="text-lg font-semibold text-frost-white mb-1">Join Meeting</h2>
-    <p class="text-sm text-frost-teal mb-4">Enter room code or link</p>
+    <h2 class="text-lg font-semibold text-fg-primary mb-1">Join Meeting</h2>
+    <p class="text-sm text-fg-secondary mb-4">Enter room code or link</p>
     <div class="flex w-full gap-2">
       <BaseInput
         v-model="roomInput"
