@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen flex flex-col bg-slate-900">
+  <div class="h-screen flex flex-col bg-canvas">
     <RoomHeader
       :room-name="roomId"
       :participant-count="participantCount"
@@ -21,7 +21,7 @@
         @give-up="handleHangup"
       />
 
-      <div v-if="error" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-frost-red text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm">
+      <div v-if="error" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-danger text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm">
         {{ error }}
       </div>
     </div>
@@ -36,7 +36,7 @@
       <template #right-controls>
         <button
           @click="toggleChat"
-          :class="['w-10 h-10 rounded-full flex items-center justify-center transition-colors', isChatOpen ? 'bg-frost-blue text-white' : 'bg-white/10 text-frost-white hover:bg-white/20']"
+          :class="['w-10 h-10 rounded-full flex items-center justify-center transition-colors', isChatOpen ? 'bg-accent text-white' : 'bg-white/10 text-fg-primary hover:bg-white/20']"
           title="Chat"
         >
           <MessageSquare class="w-5 h-5" />

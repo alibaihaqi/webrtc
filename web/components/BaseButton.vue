@@ -1,7 +1,7 @@
 <template>
   <button
     :class="[
-      'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-frost-blue disabled:opacity-50 disabled:cursor-not-allowed',
+      'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed',
       sizeClasses,
       variantClasses,
     ]"
@@ -34,9 +34,9 @@ const sizeClasses = computed(() => {
 
 const variantClasses = computed(() => {
   switch (props.variant) {
-    case 'primary': return 'bg-frost-blue text-white hover:bg-frost-blue/80 focus:ring-frost-blue'
-    case 'danger': return 'bg-frost-red text-white hover:bg-frost-red/80 focus:ring-frost-red'
-    case 'ghost': return 'bg-transparent text-frost-teal hover:bg-white/10 focus:ring-frost-teal'
+    case 'primary': return 'bg-accent text-white hover:bg-accent-hover focus:ring-accent'
+    case 'danger': return 'bg-danger text-white hover:bg-danger/80 focus:ring-danger'
+    case 'ghost': return 'bg-transparent text-fg-secondary hover:bg-white/10 focus:ring-fg-secondary'
   }
 })
 </script>

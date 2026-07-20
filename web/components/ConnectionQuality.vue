@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center space-x-2">
     <div :class="['w-3 h-3 rounded-full', indicatorColor]"></div>
-    <span class="text-sm text-gray-400">{{ qualityText }}</span>
+    <span class="text-sm text-fg-tertiary">{{ qualityText }}</span>
   </div>
 </template>
 
@@ -18,13 +18,13 @@ const props = defineProps<{
 const indicatorColor = computed(() => {
   switch (props.level) {
     case 'good':
-      return 'bg-green-500'
+      return 'bg-success'
     case 'fair':
-      return 'bg-yellow-500'
+      return 'bg-warning'
     case 'poor':
-      return 'bg-red-500'
+      return 'bg-danger'
     default:
-      return 'bg-gray-500'
+      return 'bg-fg-disabled'
   }
 })
 
