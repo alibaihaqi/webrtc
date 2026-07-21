@@ -1,11 +1,16 @@
 # Changelog
 
-## 2026-07-20 — frost design system
+## 2026-07-20 — UI redesign shipped
 
-- Frost color palette standardized across projects (PR #16)
-- Tailwind v3 → v4 migration (`@nuxtjs/tailwindcss` → `@tailwindcss/vite`)
-- `tailwind.config.ts` deleted (replaced by `@theme` in `tokens.css`)
-- Fixed "Unknown route middleware: 'auth'" — removed redundant `definePageMeta` reference (PR #17)
+- **Frost design system:** Custom Tailwind v4 color palette (slate-900 bg, frost-white/teal/blue/red tokens), Inter font, 8px grid spacing; Tailwind v3 → v4 migration (`@tailwindcss/vite`); `tailwind.config.ts` deleted (replaced by `@theme` in `tokens.css`)
+- **Shared primitives:** BaseButton (primary/danger/ghost), BaseCard, BaseAvatar (initials + online dot), BaseInput, BaseToast
+- **Dashboard landing:** TopBar with avatar + sign-out, NewMeetingCard (UUID generate → room), JoinMeetingCard (URL/code paste → room), recent meetings empty state
+- **Room UI polish:** RoomHeader (room name, participant count, connection status badge, copy invite link), RoomFooter (circular mic/video/screen/hangup controls + chat toggle)
+- **Video grid:** VideoTile integration, responsive 1-col/2-col grid, ReconnectOverlay wired, connection quality indicators
+- **Chat sidebar:** useChat composable (signaling-based, no persistence), ChatSidebar with message list + input, slide-in from right
+- **Auth flow:** Restyled login page (dark theme, Google sign-in), Firebase identity wired into room (replaces hardcoded 'user-id')
+- **Fixes:** Removed redundant `definePageMeta` middleware reference (PR #17)
+- **Tests:** 106 web tests, all green
 
 ## 2026-07-15 — v0.2 Reliability shipped
 
